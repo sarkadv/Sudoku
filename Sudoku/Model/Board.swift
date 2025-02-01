@@ -20,12 +20,24 @@ class Board
         }
     }
     
-    public func set(row: Int, column: Int, value: Int) -> Void {
+    public func setValue(row: Int, column: Int, value: Int) -> Void {
         self.cells[row][column].setValue(value: value)
     }
     
-    public func get(row: Int, column: Int) -> Int {
+    public func getValue(row: Int, column: Int) -> Int {
         return self.cells[row][column].getValue()
+    }
+    
+    public func getCandidates(row: Int, column: Int) -> [Int] {
+        return self.cells[row][column].getCandidates()
+    }
+    
+    public func addCandidate(row: Int, column: Int, candidate: Int) -> Void {
+        self.cells[row][column].addCandidate(candidate: candidate)
+    }
+    
+    public func removeCandidate(row: Int, column: Int, candidate: Int) -> Void {
+        self.cells[row][column].removeCandidate(candidate: candidate)
     }
     
     public func printBoard() -> Void {
