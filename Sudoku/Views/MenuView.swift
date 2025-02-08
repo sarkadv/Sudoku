@@ -1,14 +1,23 @@
 import SwiftUI
 
+/// zobrazení hlavního menu
 struct MenuView: View {
+    /// stav aplikace
     @Binding var state: ViewState
+    /// aktuální obtížnost hry
+    @Binding var difficulty: Difficulty
+    /// aktuální sudoku mřížka
+    @Binding var board: Board?
+    
+    /// světlé / tmavé barevné schéma
     @Environment(\.colorScheme) var colorScheme
+    /// velikost displeje
     @Environment(\.horizontalSizeClass) var sizeClass
     
     var body: some View {
-        let spacing: CGFloat = (sizeClass == .compact) ? 20.0 : 30.0
-        let imageSize: CGFloat = (sizeClass == .compact) ? 200.0 : 500.0
-        let buttonWidth: CGFloat = (sizeClass == .compact) ? 150.0 : 300.0
+        let spacing: CGFloat = (sizeClass == .compact) ? 20.0 : 30.0    // velikost mezery mezi tlačítky
+        let imageSize: CGFloat = (sizeClass == .compact) ? 200.0 : 500.0    // velikost úvodního obrázku
+        let buttonWidth: CGFloat = (sizeClass == .compact) ? 150.0 : 300.0  // šířka tlačítka
         
         VStack (spacing: spacing) {
             Image("sudoku")
@@ -21,10 +30,10 @@ struct MenuView: View {
                 .padding()
                 .font(.largeTitle)
             
-            // Easy Button
+            // jednoduchá obtížnost
             Button(action: {
-                selectedDifficulty = .easy
-                self.state = .game
+                self.difficulty = .easy
+                self.state = .loading
             }) {
                 Text("Easy")
                     .font(.headline)
@@ -33,11 +42,12 @@ struct MenuView: View {
                     .background(COLOR_EASY)
                     .foregroundColor(.white)
                     .cornerRadius(8)
-                }
+            }
             
-            // Medium Button
+            // střední obtížnost
             Button(action: {
-                selectedDifficulty = .medium
+                self.difficulty = .medium
+                self.state = .loading
             }) {
                 Text("Medium")
                     .font(.headline)
@@ -46,11 +56,12 @@ struct MenuView: View {
                     .background(COLOR_MEDIUM)
                     .foregroundColor(.white)
                     .cornerRadius(8)
-                }
+            }
             
-            // Hard Button
+            // těžká obtížnost
             Button(action: {
-                selectedDifficulty = .hard
+                self.difficulty = .hard
+                self.state = .loading
             }) {
                 Text("Hard")
                     .font(.headline)
@@ -59,7 +70,7 @@ struct MenuView: View {
                     .background(COLOR_HARD)
                     .foregroundColor(.white)
                     .cornerRadius(8)
-                }
+            }
         }
     }
 }
