@@ -9,7 +9,7 @@ struct GameView: View {
     /// aktuální sudoku mřížka - observed object, při změně je překreslena mřížka
     @EnvironmentObject var board: Board
     
-    /// true - landscape mode, false - portrait mode
+    /// orientace zařízení
     @Binding var orientation: UIDeviceOrientation
     
     /// světlé / tmavé barevné schéma
@@ -22,69 +22,142 @@ struct GameView: View {
     @State private var selectedRow: Int? = nil
     @State private var selectedColumn: Int? = nil
     
+    /// je aktivní nástroj tužka?
+    @State private var pencilActive: Bool = false
+    
     var body: some View {
         let cellSize: CGFloat = isPhone ? 35.0 : 65.0   // velikost buňky
         let borderWidth: CGFloat = isPhone ? 1.0 : 2.0  // šířka ohraničení
         let borderColor: Color = (colorScheme == .dark) ? .white : .black   // barva ohraničení
         let valueFontSize: CGFloat = isPhone ? 24.0 : 40.0  // velikost číselné hodnoty buňky
-        let candidatesFontSize: CGFloat = isPhone ? 8.5 : 16.0  // velikost kandidátů na hodnotu buňky
-        let candidatesHSpacing: CGFloat = isPhone ? 4.0 : 8.0   // horizontální prostor mezi kandidáty
+        let candidatesFontSize: CGFloat = isPhone ? 8 : 16.0  // velikost kandidátů na hodnotu buňky
+        let candidatesHSpacing: CGFloat = isPhone ? 3.5 : 8.0   // horizontální prostor mezi kandidáty
         let toolsPadding: CGFloat = isPhone ? 40.0 : 80.0     // padding nástrojů
+        let cornerRadius: CGFloat = isPhone ? 4.0 : 8.0  // zaoblení rohů
         
-        // vykreslení celé sudoku mřížky (9x9 buněk)
-        VStack (spacing: 0) {
-            ForEach(0..<self.board.ROWS, id: \.self) { row in
-                HStack (spacing: 0) {
-                    ForEach(0..<self.board.COLUMNS, id: \.self) { column in
-                        // číselná hodnota buňky
-                        let value: Int = self.board.getValue(row: row, column: column)
-                        
-                        // kandidáti na hodnotu buňky
-                        let candidates: Set<Int> = self.board.getCandidates(row: row, column: column)
-                        
-                        // velikost textu podle existence hodnoty / kandidátů
-                        let fontSize: CGFloat = value == 0 ? candidatesFontSize : valueFontSize
-                        
-                        // je buňka uživatelem zvýrazněná?
-                        let highlighted: Bool = self.board.isHighlighted(row: row, column: column)
-                        
-                        // vykreslení jedné buňky
-                        SudokuCellView(value: value,
-                                       candidates: candidates,
-                                       fontSize: fontSize,
-                                       cellSize: cellSize,
-                                       borderWidth: borderWidth,
-                                       borderColor: borderColor,
-                                       candidatesHSpacing: candidatesHSpacing,
-                                       row: row,
-                                       column: column,
-                                       selectedRow: self.selectedRow,
-                                       selectedColumn: self.selectedColumn,
-                                       highlighted: highlighted,
-                                       colorScheme: self.colorScheme)
-                            
-                            // událost při kliknutí na buňku
-                            .onTapGesture {
-                                // update vybrané buňky
-                                self.selectedRow = row
-                                self.selectedColumn = column
+        // landscape mode - hlavní Stack je HStack
+        if (orientation.isLandscape) {
+            HStack {
+                VStack (spacing: 0) {
+                    ForEach(0..<self.board.ROWS, id: \.self) { row in
+                        HStack (spacing: 0) {
+                            ForEach(0..<self.board.COLUMNS, id: \.self) { column in
+                                // číselná hodnota buňky
+                                let value: Int = self.board.getValue(row: row, column: column)
+                                
+                                // kandidáti na hodnotu buňky
+                                let candidates: Set<Int> = self.board.getCandidates(row: row, column: column)
+                                
+                                // velikost textu podle existence hodnoty / kandidátů
+                                let fontSize: CGFloat = value == 0 ? candidatesFontSize : valueFontSize
+                                
+                                // je buňka uživatelem zvýrazněná?
+                                let highlighted: Bool = self.board.isHighlighted(row: row, column: column)
+                                
+                                // vykreslení jedné buňky
+                                SudokuCellView(value: value,
+                                               candidates: candidates,
+                                               fontSize: fontSize,
+                                               cellSize: cellSize,
+                                               borderWidth: borderWidth,
+                                               borderColor: borderColor,
+                                               candidatesHSpacing: candidatesHSpacing,
+                                               row: row,
+                                               column: column,
+                                               selectedRow: self.selectedRow,
+                                               selectedColumn: self.selectedColumn,
+                                               highlighted: highlighted,
+                                               colorScheme: self.colorScheme)
+                                
+                                // událost při kliknutí na buňku
+                                .onTapGesture {
+                                    // update vybrané buňky
+                                    self.selectedRow = row
+                                    self.selectedColumn = column
+                                }
                             }
+                        }
                     }
                 }
+                .padding(toolsPadding)
+                
+                ToolsView(fontSize: valueFontSize,
+                          cellSize: cellSize,
+                          borderWidth: borderWidth,
+                          toolsPadding: toolsPadding,
+                          cornerRadius: cornerRadius,
+                          board: self.board,
+                          selectedRow: self.selectedRow,
+                          selectedColumn: self.selectedColumn,
+                          pencilActive: $pencilActive,
+                          colorScheme: self.colorScheme,
+                          orientation: self.orientation)
+                .padding(toolsPadding)
             }
         }
-        
-        ToolsView(fontSize: valueFontSize,
-                  cellSize: cellSize,
-                  borderWidth: borderWidth,
-                  toolsPadding: toolsPadding,
-                  board: self.board,
-                  selectedRow: self.selectedRow,
-                  selectedColumn: self.selectedColumn,
-                  colorScheme: self.colorScheme)
-            .padding(toolsPadding)
+        // portrait mode - hlavní Stack je VStack
+        else {
+            VStack {
+                VStack (spacing: 0) {
+                    ForEach(0..<self.board.ROWS, id: \.self) { row in
+                        HStack (spacing: 0) {
+                            ForEach(0..<self.board.COLUMNS, id: \.self) { column in
+                                // číselná hodnota buňky
+                                let value: Int = self.board.getValue(row: row, column: column)
+                                
+                                // kandidáti na hodnotu buňky
+                                let candidates: Set<Int> = self.board.getCandidates(row: row, column: column)
+                                
+                                // velikost textu podle existence hodnoty / kandidátů
+                                let fontSize: CGFloat = value == 0 ? candidatesFontSize : valueFontSize
+                                
+                                // je buňka uživatelem zvýrazněná?
+                                let highlighted: Bool = self.board.isHighlighted(row: row, column: column)
+                                
+                                // vykreslení jedné buňky
+                                SudokuCellView(value: value,
+                                               candidates: candidates,
+                                               fontSize: fontSize,
+                                               cellSize: cellSize,
+                                               borderWidth: borderWidth,
+                                               borderColor: borderColor,
+                                               candidatesHSpacing: candidatesHSpacing,
+                                               row: row,
+                                               column: column,
+                                               selectedRow: self.selectedRow,
+                                               selectedColumn: self.selectedColumn,
+                                               highlighted: highlighted,
+                                               colorScheme: self.colorScheme)
+                                    
+                                    // událost při kliknutí na buňku
+                                    .onTapGesture {
+                                        // update vybrané buňky
+                                        self.selectedRow = row
+                                        self.selectedColumn = column
+                                    }
+                            }
+                        }
+                    }
+                }
+                .padding(toolsPadding)
+                
+                ToolsView(fontSize: valueFontSize,
+                          cellSize: cellSize,
+                          borderWidth: borderWidth,
+                          toolsPadding: toolsPadding,
+                          cornerRadius: cornerRadius,
+                          board: self.board,
+                          selectedRow: self.selectedRow,
+                          selectedColumn: self.selectedColumn,
+                          pencilActive: $pencilActive,
+                          colorScheme: self.colorScheme,
+                          orientation: self.orientation)
+                    .padding(toolsPadding)
+            }
+        }
     }
 }
+
 
 /// zobrazení jedné buňky
 struct SudokuCellView: View {
@@ -134,9 +207,11 @@ struct SudokuCellView: View {
                         HStack(spacing: candidatesHSpacing) {
                             ForEach(0..<3, id: \.self) { col in
                                 let number: Int = row * 3 + col + 1 // kandidát
+                                let numberOpacity: CGFloat = candidates.contains(number) ? 1.0 : 0.0
                                 
                                 // kandidát zobrazen jen pokud je v množině kandidátů
-                                Text(candidates.contains(number) ? "\(number)" : "")
+                                Text("\(number)")
+                                    .opacity(numberOpacity)
                             }
                         }
                     }
@@ -237,6 +312,8 @@ struct ToolsView: View {
     let borderWidth: CGFloat
     /// padding nástrojů
     let toolsPadding: CGFloat
+    /// zaoblení rohů
+    let cornerRadius: CGFloat
     
     /// sudoku mřížka
     let board: Board
@@ -244,9 +321,13 @@ struct ToolsView: View {
     let selectedRow: Int?
     /// sloupec uživatelem vybrané buňky
     let selectedColumn: Int?
+    /// je aktivní nástroj tužka?
+    @Binding var pencilActive: Bool
     
     /// barevné schéma
     let colorScheme: ColorScheme
+    /// orientace zařízení
+    let orientation: UIDeviceOrientation
     
     var body: some View {
         let basicFontColor: Color = (self.colorScheme == .dark) ? .white : .black
@@ -255,43 +336,136 @@ struct ToolsView: View {
         // pro předvyplněné buňky není nástroj vymazat viditelný
         let removeToolVisibility: CGFloat = (self.board.isPreFilled(row: self.selectedRow, column: self.selectedColumn)) ? 0.0 : 1.0
         
+        // zvýraznění nástroje tužka, jestliže je aktivní
+        let pencilToolBackground: Color = self.pencilActive ? COLOR_HIGHLIGHT : COLOR_HIGHLIGHT.opacity(0.0)
+        
         VStack (spacing: toolsPadding/2) {
-            HStack(spacing: toolsPadding) {
-                // nástroj tužka pro kandidáty
-                Text(STRING_PENCIL_TOOL)
-                    .font(.system(size: fontSize))
-                
-                // nástroj zvýrazňovač
-                Text(STRING_HIGHLIGHTER_TOOL)
-                    .font(.system(size: fontSize))
-                    .onTapGesture {
-                        // zvýraznění / odstranění zvýraznění aktuálně vybrané buňky
-                        self.board.highlight(row: self.selectedRow, column: self.selectedColumn)
+            // landscape mode - nástroje v boxu
+            if (orientation.isLandscape) {
+                VStack(spacing: toolsPadding/2) {
+                    HStack(spacing: toolsPadding/2) {
+                        // nástroj tužka pro kandidáty
+                        Text(STRING_PENCIL_TOOL)
+                            .font(.system(size: fontSize))
+                            .background(pencilToolBackground)
+                            .cornerRadius(self.cornerRadius)
+                            .onTapGesture {
+                                // aktivování / deaktivování nástroje tužka
+                                self.pencilActive = !self.pencilActive
+                            }
+                        
+                        // nástroj zvýrazňovač
+                        Text(STRING_HIGHLIGHTER_TOOL)
+                            .font(.system(size: fontSize))
+                            .onTapGesture {
+                                // zvýraznění / odstranění zvýraznění aktuálně vybrané buňky
+                                self.board.highlight(row: self.selectedRow, column: self.selectedColumn)
+                            }
                     }
-                
-                // nástroj vymazat
-                Text(STRING_REMOVE_TOOL)
-                    .font(.system(size: fontSize))
-                    .opacity(removeToolVisibility)  // nastavení viditelnosti
-                    .onTapGesture {
-                        // odstranění hodnoty i kandidátů z buňky
-                        self.board.setValue(row: self.selectedRow, column: self.selectedColumn, value: 0)
+                    HStack(spacing: toolsPadding/2) {
+                        // nástroj odstranění zvýrazňovače
+                        Text(STRING_HIGHLIGHTER_REMOVE_TOOL)
+                            .font(.system(size: fontSize))
+                            .onTapGesture {
+                                // odstraní zvýraznění ze všech buněk
+                                self.board.removeAllHighlights()
+                            }
+                        
+                        // nástroj vymazat
+                        Text(STRING_REMOVE_TOOL)
+                            .font(.system(size: fontSize))
+                            .opacity(removeToolVisibility)  // nastavení viditelnosti
+                            .onTapGesture {
+                                // odstranění hodnoty i kandidátů z buňky
+                                self.board.fill(row: self.selectedRow, column: self.selectedColumn, value: 0)
+                            }
                     }
+                }
             }
-            HStack (spacing: 0) {
-                ForEach(1...9, id: \.self) { i in
-                    Text("\(i)")
+            
+            // portrait mode - nástroje v jedné řádce
+            else {
+                HStack(spacing: toolsPadding) {
+                    // nástroj tužka pro kandidáty
+                    Text(STRING_PENCIL_TOOL)
                         .font(.system(size: fontSize))
-                        .foregroundStyle(finalFontColor)
-                        .frame(width: cellSize, height: cellSize)
-                        .multilineTextAlignment(.center)
-                        .border(finalFontColor, width: borderWidth)
-                    
-                        // událost při kliknutí na číslo
+                        .background(pencilToolBackground)
+                        .cornerRadius(self.cornerRadius)
                         .onTapGesture {
-                            // vyplnění aktuálně vybrané buňky číslem
-                            self.board.setValue(row: self.selectedRow, column: self.selectedColumn, value: i)
+                            // aktivování / deaktivování nástroje tužka
+                            self.pencilActive = !self.pencilActive
                         }
+                    
+                    // nástroj zvýrazňovač
+                    Text(STRING_HIGHLIGHTER_TOOL)
+                        .font(.system(size: fontSize))
+                        .onTapGesture {
+                            // zvýraznění / odstranění zvýraznění aktuálně vybrané buňky
+                            self.board.highlight(row: self.selectedRow, column: self.selectedColumn)
+                        }
+                    
+                    // nástroj odstranění zvýrazňovače
+                    Text(STRING_HIGHLIGHTER_REMOVE_TOOL)
+                        .font(.system(size: fontSize))
+                        .onTapGesture {
+                            // odstraní zvýraznění ze všech buněk
+                            self.board.removeAllHighlights()
+                        }
+                    
+                    // nástroj vymazat
+                    Text(STRING_REMOVE_TOOL)
+                        .font(.system(size: fontSize))
+                        .opacity(removeToolVisibility)  // nastavení viditelnosti
+                        .onTapGesture {
+                            // odstranění hodnoty i kandidátů z buňky
+                            self.board.fill(row: self.selectedRow, column: self.selectedColumn, value: 0)
+                        }
+                }
+            }
+            
+            // landscape mode - čísla v boxu 3x3
+            if (orientation.isLandscape) {
+                VStack (spacing: 0) {
+                    ForEach(0...2, id: \.self) { row in
+                        HStack (spacing: 0) {
+                            ForEach(0...2, id: \.self) { column in
+                                let number: Int = row * 3 + column + 1
+                                
+                                Text("\(number)")
+                                    .font(.system(size: fontSize))
+                                    .foregroundStyle(finalFontColor)
+                                    .frame(width: cellSize, height: cellSize)
+                                    .multilineTextAlignment(.center)
+                                    .border(finalFontColor, width: borderWidth)
+                                
+                                    // událost při kliknutí na číslo
+                                    .onTapGesture {
+                                        // vyplnění aktuálně vybrané buňky číslem
+                                        self.board.fill(row: self.selectedRow, column: self.selectedColumn, value: number, pencilActive: self.pencilActive)
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // portrait mode - čísla v jedné řádce
+            else {
+                HStack (spacing: 0) {
+                    ForEach(1...9, id: \.self) { i in
+                        Text("\(i)")
+                            .font(.system(size: fontSize))
+                            .foregroundStyle(finalFontColor)
+                            .frame(width: cellSize, height: cellSize)
+                            .multilineTextAlignment(.center)
+                            .border(finalFontColor, width: borderWidth)
+                        
+                            // událost při kliknutí na číslo
+                            .onTapGesture {
+                                // vyplnění aktuálně vybrané buňky číslem
+                                self.board.fill(row: self.selectedRow, column: self.selectedColumn, value: i, pencilActive: self.pencilActive)
+                            }
+                    }
                 }
             }
         }

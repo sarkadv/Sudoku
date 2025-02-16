@@ -9,7 +9,7 @@ struct ContentView: View {
     /// aktuální sudoku mřížka - observable object
     @StateObject private var board: Board = Board()
     
-    /// true - landscape mode, false - portrait mode
+    /// orientace zařízení
     @State private var orientation: UIDeviceOrientation = UIDevice.current.orientation
     
     var body: some View {
@@ -43,13 +43,14 @@ struct ContentView: View {
     private func updateOrientation() {
         let currentOrientation: UIDeviceOrientation = UIDevice.current.orientation
         
-        if (currentOrientation == .portraitUpsideDown) {
-            // portrait mode s kamerou dole se bere jako landscape
-            self.orientation = .landscapeLeft
+        // některé orientace ignorovány
+        if (currentOrientation == .portraitUpsideDown ||
+            currentOrientation == .faceUp ||
+            currentOrientation == .faceDown) {
+            return
         }
-        else {
-            self.orientation = currentOrientation
-        }
+        
+        self.orientation = currentOrientation
     }
 }
 

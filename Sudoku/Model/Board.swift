@@ -29,31 +29,47 @@ class Board: ObservableObject
         
     }
     
-    public func addCandidate(row: Int, column: Int, candidate: Int) -> Void {
-        self.cells[row][column].addCandidate(candidate: candidate)
-        self.signalizeChange()
-    }
-    
-    public func removeCandidate(row: Int, column: Int, candidate: Int) -> Void {
-        self.cells[row][column].removeCandidate(candidate: candidate)
-        self.signalizeChange()
-    }
-    
-    public func setValue(row: Int?, column: Int?, value: Int) -> Void {
+    /// Přidá / odstraní z buňky hodnotu / kandidáta. K odstranění dojde pokud se již číslo v dané buňce nachází.
+    /// - Parameters:
+    ///   - row: řádek buňky
+    ///   - column: sloupec buňky
+    ///   - value: přidávaná hodnota / kandidát
+    ///   - pencilActive: true - přidávané číslo je kandidát / false - přidávané číslo je hodnota
+    /// - Returns: Void
+    public func fill(row: Int?, column: Int?, value: Int, pencilActive: Bool = false) -> Void {
         if (row == nil || column == nil) {
             return
         }
         
+        // předvyplněné buňky nelze modifikovat
         if (self.cells[row!][column!].isPreFilled()) {
             return
         }
-
-        self.cells[row!][column!].setValue(value: value)
+        
+        // tužka aktivní, je přidáván kandidát
+        if (!pencilActive) {
+            if (self.cells[row!][column!].getValue() == value) {
+                // kandidát se již v buňce nachází -> odstranění
+                self.cells[row!][column!].setValue(value: 0)
+            }
+            else {
+                // přidání kandidáta
+                self.cells[row!][column!].setValue(value: value)
+            }
+        }
+        // tužka neaktivní, přidávána výsledná hodnota
+        else {
+            if (self.cells[row!][column!].getCandidates().contains(value)) {
+                // hodnota se již v buňce nachází -> odstranění
+                self.cells[row!][column!].removeCandidate(candidate: value)
+            }
+            else {
+                // přidání hodnoty
+                self.cells[row!][column!].addCandidate(candidate: value)
+            }
+        }
+        
         self.signalizeChange()
-    }
-    
-    public func getValue(row: Int, column: Int) -> Int {
-        return self.cells[row][column].getValue()
     }
     
     /// Použije nástroj zvýraznění na buňku. Jestliže buňka aktuálně není zvýrazněná, bude zvýrazněna a naopak.
@@ -69,6 +85,21 @@ class Board: ObservableObject
         let currentHighlighted: Bool = self.cells[row!][column!].isHighlighted()
         self.cells[row!][column!].setHighlighted(highlighted: !currentHighlighted)  // boolean zvýraznění je přehozen
         self.signalizeChange()
+    }
+    
+    /// Odstraní zvýraznění ze všech buněk.
+    /// - Returns: Void
+    public func removeAllHighlights() -> Void {
+        for row in 0..<ROWS {
+            for column in 0..<COLUMNS {
+                self.cells[row][column].setHighlighted(highlighted: false)
+            }
+        }
+        self.signalizeChange()
+    }
+    
+    public func getValue(row: Int, column: Int) -> Int {
+        return self.cells[row][column].getValue()
     }
     
     public func getCandidates(row: Int, column: Int) -> Set<Int> {

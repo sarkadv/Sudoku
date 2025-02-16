@@ -10,7 +10,7 @@ struct MenuView: View {
     /// aktuální sudoku mřížka
     @EnvironmentObject var board: Board
     
-    /// true - landscape mode, false - portrait mode
+    /// orientace zařízení
     @Binding var orientation: UIDeviceOrientation
     
     /// světlé / tmavé barevné schéma
