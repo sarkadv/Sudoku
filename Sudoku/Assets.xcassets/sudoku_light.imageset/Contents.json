@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "sudoku.png",
+      "filename" : "sudoku_light.png",
       "idiom" : "universal",
       "scale" : "1x"
     },

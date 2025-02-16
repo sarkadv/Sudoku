@@ -6,71 +6,155 @@ struct MenuView: View {
     @Binding var state: ViewState
     /// aktuální obtížnost hry
     @Binding var difficulty: Difficulty
+    
     /// aktuální sudoku mřížka
-    @Binding var board: Board?
+    @EnvironmentObject var board: Board
+    
+    /// true - landscape mode, false - portrait mode
+    @Binding var orientation: UIDeviceOrientation
     
     /// světlé / tmavé barevné schéma
-    @Environment(\.colorScheme) var colorScheme
-    /// velikost displeje
-    @Environment(\.horizontalSizeClass) var sizeClass
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    
+    /// true - iPhone / false - iPad
+    private let isPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone
     
     var body: some View {
-        let spacing: CGFloat = (sizeClass == .compact) ? 20.0 : 30.0    // velikost mezery mezi tlačítky
-        let imageSize: CGFloat = (sizeClass == .compact) ? 200.0 : 500.0    // velikost úvodního obrázku
-        let buttonWidth: CGFloat = (sizeClass == .compact) ? 150.0 : 300.0  // šířka tlačítka
+        let spacing: CGFloat = isPhone ? 20.0 : 30.0    // velikost mezery mezi tlačítky
+        let imageSize: CGFloat = isPhone ? 200.0 : 400.0    // velikost úvodního obrázku
+        let imageName: String = (colorScheme == .dark) ? "sudoku_dark" : "sudoku_light" // úvodní obrázek
+        let buttonWidth: CGFloat = isPhone ? 150.0 : 350.0  // šířka tlačítka
+        let titleFontSize: CGFloat = isPhone ? 30.0 : 50.0  // velikost nadpisu
         
-        VStack (spacing: spacing) {
-            Image("sudoku")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: imageSize, height: imageSize)
+        // barvy tlačítek
+        let buttonEasyColor: Color = (colorScheme == .dark) ? COLOR_EASY_DARK : COLOR_EASY_LIGHT
+        let buttonMediumColor: Color = (colorScheme == .dark) ? COLOR_MEDIUM_DARK : COLOR_MEDIUM_LIGHT
+        let buttonHardColor: Color = (colorScheme == .dark) ? COLOR_HARD_DARK : COLOR_HARD_LIGHT
+        let buttonSettingsColor: Color = .gray
+        
+        // landscape mode
+        if (orientation.isLandscape) {
+            HStack (spacing: spacing * 4) {
+                VStack (spacing: 0) {
+                    ImageView(imageName: imageName, imageSize: imageSize)
+                    
+                    TitleView(fontSize: titleFontSize)
+                }
+                
+                VStack (spacing: spacing) {
+                    ButtonsView(state: self.$state, difficulty: self.$difficulty, buttonWidth: buttonWidth, buttonEasyColor: buttonEasyColor, buttonMediumColor: buttonMediumColor, buttonHardColor: buttonHardColor, buttonSettingsColor: buttonSettingsColor)
+                }
+            }
+        }
+        // portait mode
+        else {
+            VStack (spacing: spacing) {
+                ImageView(imageName: imageName, imageSize: imageSize)
+                
+                TitleView(fontSize: titleFontSize)
+                
+                ButtonsView(state: self.$state, difficulty: self.$difficulty, buttonWidth: buttonWidth, buttonEasyColor: buttonEasyColor, buttonMediumColor: buttonMediumColor, buttonHardColor: buttonHardColor, buttonSettingsColor: buttonSettingsColor)
+            }
+        }
+    }
+}
+
+/// zobrazení úvodního obrázku
+struct ImageView: View {
+    /// název úvodního obrázku
+    let imageName: String
+    /// velikost úvodního obrázku
+    let imageSize: CGFloat
+    
+    var body: some View {
+        Image(imageName)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: imageSize, height: imageSize)
+            .padding()
+    }
+}
+
+/// zobrazení názvu hry
+struct TitleView: View {
+    let fontSize: CGFloat
+    
+    var body: some View {
+        Text("sudoku")
+            .padding()
+            .font(.system(size: fontSize))
+    }
+}
+
+/// zobrazení tlačítek v menu
+struct ButtonsView: View {
+    /// stav aplikace
+    @Binding var state: ViewState
+    /// aktuální obtížnost hry
+    @Binding var difficulty: Difficulty
+    
+    /// šířka tlačítka
+    let buttonWidth: CGFloat
+    
+    // barvy tlačítek
+    let buttonEasyColor: Color
+    let buttonMediumColor: Color
+    let buttonHardColor: Color
+    let buttonSettingsColor: Color
+    
+    var body: some View {
+        Button(action: {
+            self.difficulty = .easy
+            self.state = .loading
+        }) {
+            Text("Easy")
+                .font(.headline)
                 .padding()
-            
-            Text("sudoku")
+                .frame(width: buttonWidth)
+                .background(buttonEasyColor)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+        }
+        
+        // střední obtížnost
+        Button(action: {
+            self.difficulty = .medium
+            self.state = .loading
+        }) {
+            Text("Medium")
+                .font(.headline)
                 .padding()
-                .font(.largeTitle)
-            
-            // jednoduchá obtížnost
-            Button(action: {
-                self.difficulty = .easy
-                self.state = .loading
-            }) {
-                Text("Easy")
-                    .font(.headline)
-                    .padding()
-                    .frame(width: buttonWidth)
-                    .background(COLOR_EASY)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            
-            // střední obtížnost
-            Button(action: {
-                self.difficulty = .medium
-                self.state = .loading
-            }) {
-                Text("Medium")
-                    .font(.headline)
-                    .padding()
-                    .frame(width: buttonWidth)
-                    .background(COLOR_MEDIUM)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            
-            // těžká obtížnost
-            Button(action: {
-                self.difficulty = .hard
-                self.state = .loading
-            }) {
-                Text("Hard")
-                    .font(.headline)
-                    .padding()
-                    .frame(width: buttonWidth)
-                    .background(COLOR_HARD)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
+                .frame(width: buttonWidth)
+                .background(buttonMediumColor)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+        }
+        
+        // těžká obtížnost
+        Button(action: {
+            self.difficulty = .hard
+            self.state = .loading
+        }) {
+            Text("Hard")
+                .font(.headline)
+                .padding()
+                .frame(width: buttonWidth)
+                .background(buttonHardColor)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+        }
+        
+        // nastavení
+        Button(action: {
+            self.state = .settings
+        }) {
+            Text("Settings")
+                .font(.headline)
+                .padding()
+                .frame(width: buttonWidth)
+                .background(buttonSettingsColor)
+                .foregroundColor(.white)
+                .cornerRadius(8)
         }
     }
 }

@@ -1,29 +1,31 @@
 import Foundation
 
-class Cell
+class Cell: ObservableObject
 {
     /// aktuální hodnota buňky (0 pokud prázdná)
     private var value: Int
+    
     /// uživatelem vybraní kandidáti na hodnotu buňky
     private var candidates: Set<Int>
-    /// správné řešení buňky
-    private var solution: Int
     
     /// řádek buňky
     private var row: Int
     /// sloupec buňky
     private var column: Int
     
-    /// z předvyplněných buněk nemůže uživatel vymazat hodnotu
-    private var deletable: Bool
+    /// u předvyplněných buněk nemůže uživatel změnit hodnotu
+    private var preFilled: Bool
     
-    public init(row: Int, column: Int, value: Int = 0, candidates: Set<Int> = [], solution: Int = 0, deletable: Bool = false) {
+    /// je buňka uživatelem zvýrazněná?
+    private var highlighted: Bool
+    
+    public init(row: Int, column: Int, value: Int = 0, candidates: Set<Int> = [], preFilled: Bool = true, highlighted: Bool = false) {
         self.row = row
         self.column = column
         self.value = value
         self.candidates = candidates
-        self.solution = solution
-        self.deletable = deletable
+        self.preFilled = preFilled
+        self.highlighted = highlighted
     }
     
     public func addCandidate(candidate: Int) -> Void {
@@ -55,20 +57,20 @@ class Cell
         return self.candidates
     }
     
-    public func getSolution() -> Int {
-        return self.solution
+    public func isPreFilled() -> Bool {
+        return self.preFilled
     }
     
-    public func setSolution(solution: Int) -> Void {
-        self.solution = solution
+    public func setPreFilled(preFilled: Bool) -> Void {
+        self.preFilled = preFilled
     }
     
-    public func getDeletable() -> Bool {
-        return self.deletable
+    public func isHighlighted() -> Bool {
+        return self.highlighted
     }
     
-    public func setDeletable(deletable: Bool) -> Void {
-        self.deletable = deletable
+    public func setHighlighted(highlighted: Bool) -> Void {
+        self.highlighted = highlighted
     }
 }
 

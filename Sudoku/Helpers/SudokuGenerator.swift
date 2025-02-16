@@ -1,3 +1,5 @@
+import Foundation
+
 /// generuje sudoku mřížku připravenou pro hru
 class SudokuGenerator
 {
@@ -10,7 +12,7 @@ class SudokuGenerator
     private static let allCandidates: [Int] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     
     /// počet prázdných buněk podle obtížnosti
-    private static var holes: [Difficulty : Int] = [.easy : 30, .medium : 40, .hard : 50]
+    private static var holes: [Difficulty : Int] = [.easy : 20, .medium : 30, .hard : 40]
     
     /// Vygeneruje sudoku mřížku připravenou pro hru.
     /// - Parameter difficulty: obtížnost hry
@@ -74,7 +76,6 @@ class SudokuGenerator
             }
 
             cells[row][column].setValue(value: candidate)
-            cells[row][column].setSolution(solution: candidate)
             
             // umístění dalšího čísla do prázdné buňky
             let result: [[Cell]]? = generateCompleteBoard(cells: cells)
@@ -88,7 +89,6 @@ class SudokuGenerator
                 // do další buňky nemohlo být umístěno žádné číslo
                 // reset a vyzkoušení dalšího kandidáta
                 cells[row][column].setValue(value: 0)
-                cells[row][column].setSolution(solution: 0)
             }
 
         }
@@ -141,7 +141,7 @@ class SudokuGenerator
                 removedValues += 1
                 
                 // prázdnou buňku smí hráč modifikovat a vymazat
-                cells[row][column].setDeletable(deletable: true)
+                cells[row][column].setPreFilled(preFilled: false)
             }
             else {
                 // sudoku nemá právě jedno řešení, nutné hodnotu do buňky vrátit
@@ -301,6 +301,31 @@ class SudokuGenerator
         }
         
         return nil
+    }
+    
+    public static func fetchSudokuPuzzle() {
+        let urlString = "https://sudoku-api.vercel.app/api/dosuku"
+        
+        let url = URL(string: urlString)
+        
+        if (url == nil)
+        {
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: url!) { data, response, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let _ = data else {
+                print("No data received")
+                return
+            }
+        }
+        
+        task.resume()
     }
 }
 

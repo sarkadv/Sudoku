@@ -7,12 +7,12 @@ struct LoadingView: View {
     /// aktuální obtížnost hry
     @Binding var difficulty: Difficulty
     /// aktuální sudoku mřížka
-    @Binding var board: Board?
+    @EnvironmentObject var board: Board
     
     /// světlé / tmavé barevné schéma
-    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
     /// velikost displeje
-    @Environment(\.horizontalSizeClass) var sizeClass
+    @Environment(\.horizontalSizeClass) var sizeClass: UserInterfaceSizeClass?
     
     var body: some View {
         let loadingBarColor: Color = (colorScheme == .dark) ? .white : .black  // barva loading baru
@@ -39,7 +39,7 @@ struct LoadingView: View {
     /// Asynchronní vygenerování sudoku mřížky
     /// - Returns: Void
     func generate() async -> Void {
-        self.board = Board(difficulty: self.difficulty)
+        self.board.generate(difficulty: self.difficulty)
         self.state = .game
     }
 }
