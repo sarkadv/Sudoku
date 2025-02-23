@@ -54,6 +54,9 @@ struct GameView: View {
                                 // je buňka uživatelem zvýrazněná?
                                 let highlighted: Bool = self.board.isHighlighted(row: row, column: column)
                                 
+                                // je uživatelem určená hodnota správně?
+                                let correct: Bool = self.board.isCorrect(row: row, column: column)
+                                
                                 // vykreslení jedné buňky
                                 SudokuCellView(value: value,
                                                candidates: candidates,
@@ -67,6 +70,7 @@ struct GameView: View {
                                                selectedRow: self.selectedRow,
                                                selectedColumn: self.selectedColumn,
                                                highlighted: highlighted,
+                                               correct: correct,
                                                colorScheme: self.colorScheme)
                                 
                                 // událost při kliknutí na buňku
@@ -114,6 +118,9 @@ struct GameView: View {
                                 // je buňka uživatelem zvýrazněná?
                                 let highlighted: Bool = self.board.isHighlighted(row: row, column: column)
                                 
+                                // je uživatelem určená hodnota správně?
+                                let correct: Bool = self.board.isCorrect(row: row, column: column)
+                                
                                 // vykreslení jedné buňky
                                 SudokuCellView(value: value,
                                                candidates: candidates,
@@ -127,6 +134,7 @@ struct GameView: View {
                                                selectedRow: self.selectedRow,
                                                selectedColumn: self.selectedColumn,
                                                highlighted: highlighted,
+                                               correct: correct,
                                                colorScheme: self.colorScheme)
                                     
                                     // událost při kliknutí na buňku
@@ -186,12 +194,16 @@ struct SudokuCellView: View {
     
     /// je buňka uživatelem zvýrazněná?
     let highlighted: Bool
+    /// je uživatelem určená hodnota správně?
+    let correct: Bool
     
     /// barevné schéma
     let colorScheme: ColorScheme
     
     var body: some View {
         let backgroundColor: Color = self.determineCellColor()
+        let valueColor: Color = self.colorScheme == .dark ? .white : .black
+        let finalValueColor: Color = self.correct ? valueColor : .red
         let finalBorderColor: Color = self.highlighted ? COLOR_HIGHLIGHT : self.borderColor
         let finalBorderWidth: CGFloat = self.highlighted ? self.borderWidth * 4 : borderWidth
         
@@ -199,6 +211,7 @@ struct SudokuCellView: View {
             if value != 0 {
                 // buňka má danou hodnotu
                 Text("\(value)")
+                    .foregroundStyle(finalValueColor)
             }
             else {
                 // buňka nemá hodnotu -> zobrazení 3x3 mřížky pro kandidáty

@@ -14,19 +14,24 @@ class Board: ObservableObject
     /// observed atribut, při změně je mřížka překreslena
     @Published private var change: Int
     
+    private let fetcher: SudokuFetcher
+    
     /// Konstruktor pro vytvoření instance sudoku mřížky.
     /// Mřížka je vytvořena prázdná a je později naplněna metodou generate().
     public init() {
         self.cells = []
         self.change = 0
+        self.fetcher = SudokuFetcher()
     }
     
     /// Vygeneruje sudoku mřížku připravenou ke hře.
     /// - Parameter difficulty: obtížnost vygenerované mřížky
-    public func generate(difficulty: Difficulty) {
-        // vygenerování sudoku ke hře
-        self.cells = SudokuGenerator.generatePlayableSudoku(difficulty: difficulty)
+    public func generate(difficulty: Difficulty) async -> Void {
+        let result: [[Cell]]
+        // vytvoření sudoku ke hře
+        await result = self.fetcher.fetchPuzzle(difficulty: difficulty)
         
+        self.cells = result
     }
     
     /// Přidá / odstraní z buňky hodnotu / kandidáta. K odstranění dojde pokud se již číslo v dané buňce nachází.
@@ -116,6 +121,22 @@ class Board: ObservableObject
     
     public func isHighlighted(row: Int, column: Int) -> Bool {
         return self.cells[row][column].isHighlighted()
+    }
+    
+    public func isCorrect(row: Int, column: Int) -> Bool {
+        return self.cells[row][column].isCorrect()
+    }
+    
+    public func isWin() -> Bool {
+        for i in 0..<self.ROWS {
+            for j in 0..<self.COLUMNS {
+                if (!self.cells[i][j].isCorrect()) {
+                    return false
+                }
+            }
+        }
+        
+        return true
     }
     
     

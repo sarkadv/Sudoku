@@ -2,6 +2,9 @@ import Foundation
 
 class Cell: ObservableObject
 {
+    /// správné řešení buňky
+    private var solution: Int
+    
     /// aktuální hodnota buňky (0 pokud prázdná)
     private var value: Int
     
@@ -19,12 +22,13 @@ class Cell: ObservableObject
     /// je buňka uživatelem zvýrazněná?
     private var highlighted: Bool
     
-    public init(row: Int, column: Int, value: Int = 0, candidates: Set<Int> = [], preFilled: Bool = true, highlighted: Bool = false) {
+    public init(row: Int, column: Int, solution: Int, value: Int,preFilled: Bool, candidates: Set<Int> = [], highlighted: Bool = false) {
         self.row = row
         self.column = column
+        self.solution = solution
         self.value = value
-        self.candidates = candidates
         self.preFilled = preFilled
+        self.candidates = candidates
         self.highlighted = highlighted
     }
     
@@ -71,6 +75,10 @@ class Cell: ObservableObject
     
     public func setHighlighted(highlighted: Bool) -> Void {
         self.highlighted = highlighted
+    }
+    
+    public func isCorrect() -> Bool {
+        return self.value == self.solution
     }
 }
 

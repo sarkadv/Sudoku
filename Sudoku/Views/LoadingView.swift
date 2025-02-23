@@ -39,7 +39,7 @@ struct LoadingView: View {
     /// Asynchronní vygenerování sudoku mřížky
     /// - Returns: Void
     func generate() async -> Void {
-        self.board.generate(difficulty: self.difficulty)
+        await self.board.generate(difficulty: self.difficulty)
         self.state = .game
     }
 }
