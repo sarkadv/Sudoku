@@ -30,7 +30,7 @@ struct MenuView: View {
         let buttonEasyColor: Color = (colorScheme == .dark) ? COLOR_EASY_DARK : COLOR_EASY_LIGHT
         let buttonMediumColor: Color = (colorScheme == .dark) ? COLOR_MEDIUM_DARK : COLOR_MEDIUM_LIGHT
         let buttonHardColor: Color = (colorScheme == .dark) ? COLOR_HARD_DARK : COLOR_HARD_LIGHT
-        let buttonSettingsColor: Color = .gray
+        let buttonSettingsColor: Color = (colorScheme == .dark) ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT
         
         // landscape mode
         if (orientation.isLandscape) {

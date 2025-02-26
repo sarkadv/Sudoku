@@ -9,6 +9,16 @@ struct GameView: View {
     /// aktuální sudoku mřížka - observed object, při změně je překreslena mřížka
     @EnvironmentObject var board: Board
     
+    /// souřadnice uživatelem vybrané buňky
+    @State private var selectedRow: Int? = nil
+    @State private var selectedColumn: Int? = nil
+    
+    /// je aktivní nástroj tužka?
+    @State private var pencilActive: Bool = false
+    
+    /// timer pro čas řešení aktuálního sudoku
+    @StateObject private var timer = GameTimer()
+    
     /// orientace zařízení
     @Binding var orientation: UIDeviceOrientation
     
@@ -17,13 +27,6 @@ struct GameView: View {
     
     /// true - iPhone / false - iPad
     private let isPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone
-    
-    /// souřadnice uživatelem vybrané buňky
-    @State private var selectedRow: Int? = nil
-    @State private var selectedColumn: Int? = nil
-    
-    /// je aktivní nástroj tužka?
-    @State private var pencilActive: Bool = false
     
     var body: some View {
         let cellSize: CGFloat = isPhone ? 35.0 : 65.0   // velikost buňky
@@ -34,6 +37,10 @@ struct GameView: View {
         let candidatesHSpacing: CGFloat = isPhone ? 3.5 : 8.0   // horizontální prostor mezi kandidáty
         let toolsPadding: CGFloat = isPhone ? 40.0 : 80.0     // padding nástrojů
         let cornerRadius: CGFloat = isPhone ? 4.0 : 8.0  // zaoblení rohů
+        let buttonWidth: CGFloat = isPhone ? 125.0 : 300.0  // šířka tlačítka menu
+        let buttonHeight: CGFloat = isPhone ? 40.0 : 60.0     // výška tlačítka menu
+        let buttonColor: Color = (colorScheme == .dark) ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT   // barva tlačítka menu
+        let timerFont: Font = isPhone ? .headline : .title
         
         // landscape mode - hlavní Stack je HStack
         if (orientation.isLandscape) {
@@ -85,23 +92,48 @@ struct GameView: View {
                 }
                 .padding(toolsPadding)
                 
-                ToolsView(fontSize: valueFontSize,
-                          cellSize: cellSize,
-                          borderWidth: borderWidth,
-                          toolsPadding: toolsPadding,
-                          cornerRadius: cornerRadius,
-                          board: self.board,
-                          selectedRow: self.selectedRow,
-                          selectedColumn: self.selectedColumn,
-                          pencilActive: $pencilActive,
-                          colorScheme: self.colorScheme,
-                          orientation: self.orientation)
-                .padding(toolsPadding)
+                VStack {
+                    MenuButton(buttonWidth: buttonWidth,
+                               buttonHeight: buttonHeight,
+                               cornerRadius: cornerRadius,
+                               buttonColor: buttonColor,
+                               state: $state)
+                        .padding(.bottom, toolsPadding/2)
+                    
+                    Text(self.timer.getTimeString())
+                        .bold()
+                        .font(timerFont)
+                    
+                    ToolsView(fontSize: valueFontSize,
+                              cellSize: cellSize,
+                              borderWidth: borderWidth,
+                              toolsPadding: toolsPadding,
+                              cornerRadius: cornerRadius,
+                              board: self.board,
+                              selectedRow: self.selectedRow,
+                              selectedColumn: self.selectedColumn,
+                              pencilActive: $pencilActive,
+                              colorScheme: self.colorScheme,
+                              orientation: self.orientation)
+                    .padding(.top, toolsPadding/2)
+                }
             }
+            .onAppear(perform: self.timer.start)
         }
         // portrait mode - hlavní Stack je VStack
         else {
             VStack {
+                MenuButton(buttonWidth: buttonWidth,
+                           buttonHeight: buttonHeight,
+                           cornerRadius: cornerRadius,
+                           buttonColor: buttonColor,
+                           state: $state)
+                    .padding(toolsPadding)
+                
+                Text(self.timer.getTimeString())
+                    .bold()
+                    .font(timerFont)
+                
                 VStack (spacing: 0) {
                     ForEach(0..<self.board.ROWS, id: \.self) { row in
                         HStack (spacing: 0) {
@@ -162,6 +194,30 @@ struct GameView: View {
                           orientation: self.orientation)
                     .padding(toolsPadding)
             }
+            .onAppear(perform: self.timer.start)
+        }
+    }
+}
+
+struct MenuButton: View {
+    let buttonWidth: CGFloat
+    let buttonHeight: CGFloat
+    let cornerRadius: CGFloat
+    let buttonColor: Color
+    
+    @Binding var state: ViewState
+    
+    var body: some View {
+        Button(action: {
+            self.state = .menu
+        }) {
+            Text("Menu")
+                .font(.headline)
+                .padding()
+                .frame(width: buttonWidth, height: buttonHeight)
+                .background(buttonColor)
+                .foregroundColor(.white)
+                .cornerRadius(cornerRadius)
         }
     }
 }
