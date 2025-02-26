@@ -24,12 +24,14 @@ struct MenuView: View {
         let imageSize: CGFloat = isPhone ? 200.0 : 400.0    // velikost úvodního obrázku
         let imageName: String = (colorScheme == .dark) ? "sudoku_dark" : "sudoku_light" // úvodní obrázek
         let buttonWidth: CGFloat = isPhone ? 150.0 : 350.0  // šířka tlačítka
+        let buttonHeight: CGFloat = isPhone ? 40.0 : 60.0   // výška tlačítka
         let titleFontSize: CGFloat = isPhone ? 30.0 : 50.0  // velikost nadpisu
         
         // barvy tlačítek
         let buttonEasyColor: Color = (colorScheme == .dark) ? COLOR_EASY_DARK : COLOR_EASY_LIGHT
         let buttonMediumColor: Color = (colorScheme == .dark) ? COLOR_MEDIUM_DARK : COLOR_MEDIUM_LIGHT
         let buttonHardColor: Color = (colorScheme == .dark) ? COLOR_HARD_DARK : COLOR_HARD_LIGHT
+        let buttonDemoColor: Color = (colorScheme == .dark) ? COLOR_DEMO_DARK : COLOR_DEMO_LIGHT
         let buttonSettingsColor: Color = (colorScheme == .dark) ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT
         
         // landscape mode
@@ -42,7 +44,15 @@ struct MenuView: View {
                 }
                 
                 VStack (spacing: spacing) {
-                    ButtonsView(state: self.$state, difficulty: self.$difficulty, buttonWidth: buttonWidth, buttonEasyColor: buttonEasyColor, buttonMediumColor: buttonMediumColor, buttonHardColor: buttonHardColor, buttonSettingsColor: buttonSettingsColor)
+                    ButtonsView(state: self.$state,
+                                difficulty: self.$difficulty,
+                                buttonWidth: buttonWidth,
+                                buttonHeight: buttonHeight,
+                                buttonEasyColor: buttonEasyColor,
+                                buttonMediumColor: buttonMediumColor,
+                                buttonHardColor: buttonHardColor,
+                                buttonDemoColor: buttonDemoColor,
+                                buttonSettingsColor: buttonSettingsColor)
                 }
             }
         }
@@ -53,7 +63,15 @@ struct MenuView: View {
                 
                 TitleView(fontSize: titleFontSize)
                 
-                ButtonsView(state: self.$state, difficulty: self.$difficulty, buttonWidth: buttonWidth, buttonEasyColor: buttonEasyColor, buttonMediumColor: buttonMediumColor, buttonHardColor: buttonHardColor, buttonSettingsColor: buttonSettingsColor)
+                ButtonsView(state: self.$state,
+                            difficulty: self.$difficulty,
+                            buttonWidth: buttonWidth,
+                            buttonHeight: buttonHeight,
+                            buttonEasyColor: buttonEasyColor,
+                            buttonMediumColor: buttonMediumColor,
+                            buttonHardColor: buttonHardColor,
+                            buttonDemoColor: buttonDemoColor,
+                            buttonSettingsColor: buttonSettingsColor)
             }
         }
     }
@@ -95,11 +113,14 @@ struct ButtonsView: View {
     
     /// šířka tlačítka
     let buttonWidth: CGFloat
+    /// výška tlačítka
+    let buttonHeight: CGFloat
     
     // barvy tlačítek
     let buttonEasyColor: Color
     let buttonMediumColor: Color
     let buttonHardColor: Color
+    let buttonDemoColor: Color
     let buttonSettingsColor: Color
     
     var body: some View {
@@ -110,7 +131,7 @@ struct ButtonsView: View {
             Text("Easy")
                 .font(.headline)
                 .padding()
-                .frame(width: buttonWidth)
+                .frame(width: buttonWidth, height: buttonHeight)
                 .background(buttonEasyColor)
                 .foregroundColor(.white)
                 .cornerRadius(8)
@@ -124,7 +145,7 @@ struct ButtonsView: View {
             Text("Medium")
                 .font(.headline)
                 .padding()
-                .frame(width: buttonWidth)
+                .frame(width: buttonWidth, height: buttonHeight)
                 .background(buttonMediumColor)
                 .foregroundColor(.white)
                 .cornerRadius(8)
@@ -138,8 +159,22 @@ struct ButtonsView: View {
             Text("Hard")
                 .font(.headline)
                 .padding()
-                .frame(width: buttonWidth)
+                .frame(width: buttonWidth, height: buttonHeight)
                 .background(buttonHardColor)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+        }
+        
+        // demo obtížnost
+        Button(action: {
+            self.difficulty = .demo
+            self.state = .loading
+        }) {
+            Text("Demo")
+                .font(.headline)
+                .padding()
+                .frame(width: buttonWidth, height: buttonHeight)
+                .background(buttonDemoColor)
                 .foregroundColor(.white)
                 .cornerRadius(8)
         }
@@ -151,7 +186,7 @@ struct ButtonsView: View {
             Text("Settings")
                 .font(.headline)
                 .padding()
-                .frame(width: buttonWidth)
+                .frame(width: buttonWidth, height: buttonHeight)
                 .background(buttonSettingsColor)
                 .foregroundColor(.white)
                 .cornerRadius(8)

@@ -30,6 +30,10 @@ class CSVLoader
             let rows = content.components(separatedBy: self.rowSeparator).dropFirst().dropLast()
             
             for row in rows {
+                if row.isEmpty {
+                    continue
+                }
+                
                 let sudoku: FileResponse = processRow(row: row)
                 sudokus.append(sudoku)
             }

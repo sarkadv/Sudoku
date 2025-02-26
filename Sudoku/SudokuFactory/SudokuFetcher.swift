@@ -29,6 +29,11 @@ class SudokuFetcher
     /// - Parameter difficulty: požadovaná obtížnost
     /// - Returns: 2D mřížka Cell instancí
     public func fetchPuzzle(difficulty: Difficulty) async -> [[Cell]] {
+        // demo je pouze ze souboru
+        if (difficulty == .demo) {
+            return self.fetchFromFile(difficulty: .demo)
+        }
+        
         // zkusíme, zda sudoku dané obtížnosti není v cache
         let cachedResponse: Response? = self.cache.popFromApiCache(difficulty: difficulty)
         

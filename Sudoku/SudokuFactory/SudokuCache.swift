@@ -72,9 +72,9 @@ class SudokuCache
     private func initializeCache() -> [Difficulty: [Response]] {
         var cache: [Difficulty: [Response]] = [:]
         
-        cache[.easy] = []
-        cache[.medium] = []
-        cache[.hard] = []
+        for difficulty in Difficulty.allCases {
+            cache[difficulty] = []
+        }
         
         return cache
     }
