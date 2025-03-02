@@ -8,6 +8,8 @@ struct ContentView: View {
     @State private var difficulty: Difficulty = .easy
     /// aktuální sudoku mřížka - observable object
     @StateObject private var board: Board = Board()
+    /// čas v sekundách poslední dohrané hry
+    @State private var finalScoreSeconds: Int = 0
     
     /// orientace zařízení
     @State private var orientation: UIDeviceOrientation = UIDevice.current.orientation
@@ -25,8 +27,11 @@ struct ContentView: View {
                     .environmentObject(board)
             }
             else if (state == .game) {
-                GameView(state: $state, difficulty: $difficulty, orientation: $orientation)
+                GameView(state: $state, difficulty: $difficulty, finalScoreSeconds: $finalScoreSeconds, orientation: $orientation)
                     .environmentObject(board)
+            }
+            else if (state == .win) {
+                WinView(state: $state, difficulty: $difficulty, finalScoreSeconds: $finalScoreSeconds)
             }
         }
         .onAppear {

@@ -51,25 +51,33 @@ class Board: ObservableObject
             return
         }
         
-        // tužka aktivní, je přidáván kandidát
+        // tužka neaktivní, přidávána výsledná hodnota
         if (!pencilActive) {
             if (self.cells[row!][column!].getValue() == value) {
-                // kandidát se již v buňce nachází -> odstranění
+                // hodnota se již v buňce nachází -> odstranění
                 self.cells[row!][column!].setValue(value: 0)
             }
             else {
-                // přidání kandidáta
+                // přidání hodnoty
                 self.cells[row!][column!].setValue(value: value)
+                
+                // pokud je uživatelem zadaná hodnota správně
+                if (self.cells[row!][column!].getSolution() == value) {
+                    
+                    // odstranění kanditátů se stejnou hodnotou z viditelných buněk
+                    self.removeVisibleCellsCandidate(row: row!, column: column!, value: value)
+                }
             }
         }
-        // tužka neaktivní, přidávána výsledná hodnota
+        
+        // tužka aktivní, je přidáván kandidát
         else {
             if (self.cells[row!][column!].getCandidates().contains(value)) {
-                // hodnota se již v buňce nachází -> odstranění
+                // kandidát se již v buňce nachází -> odstranění
                 self.cells[row!][column!].removeCandidate(candidate: value)
             }
             else {
-                // přidání hodnoty
+                // přidání kandidáta
                 self.cells[row!][column!].addCandidate(candidate: value)
             }
         }
@@ -137,6 +145,57 @@ class Board: ObservableObject
         }
         
         return true
+    }
+    
+    /// Vrátí souřadnice buněk viditelné z buňky dané parametrem.
+    /// Buňka je pro jinou buňku viditelná, jestliže se nachází ve stejném boxu, sloupci, nebo řádku.
+    /// - Parameters:
+    ///   - row: řádek buňky
+    ///   - column: sloupec buňky
+    /// - Returns: souřadnice viditelných buněk z buňky dané parametrem
+    public func getVisibleCellCoords(row: Int?, column: Int?) -> [(Int, Int)] {
+        if (row == nil || column == nil) {
+            return []
+        }
+        
+        var result: [(Int, Int)] = []
+        
+        let boxStartRow: Int = row! - (row! % 3)  // řádek levého horního rohu boxu
+        let boxStartColumn: Int = column! - (column! % 3) // sloupec levého horního rohu boxu
+        
+        for i in 0..<self.ROWS {
+            for j in 0..<self.COLUMNS {
+                // test sloupce nebo řádku
+                if (row == i || column == j) {
+                    result.append((i, j))
+                }
+
+                // test boxu
+                if ((i - boxStartRow < 3 && i - boxStartRow >= 0) &&
+                    (j - boxStartColumn < 3 && j - boxStartColumn >= 0)) {
+                    result.append((i, j))
+                }
+            }
+        }
+        
+        return result
+    }
+    
+    /// Odstraní kanditáty se stejnou hodnotou z buněk viditelných z buňky dané parametrem.
+    /// - Parameters:
+    ///   - row: řádek buňky
+    ///   - column: sloupec buňky
+    ///   - value: hodnota k odstranění
+    /// - Returns: Void
+    private func removeVisibleCellsCandidate(row: Int, column: Int, value: Int) -> Void {
+        let visibleCellCoords: [(Int, Int)] = self.getVisibleCellCoords(row: row, column: column)
+        
+        for coords in visibleCellCoords {
+            let row = coords.0
+            let column = coords.1
+            
+            self.cells[row][column].removeCandidate(candidate: value)
+        }
     }
     
     

@@ -23,16 +23,14 @@ class GameTimer: ObservableObject {
         self.timer = Timer.publish(every: 1, on: .main, in: .common)    // objekt pro generování události běží v hlavním vlákně
             .autoconnect()  // zapnutí timeru
             .sink { _ in    // odebírá událost, zavolá funkci pro inkrementaci elapsedTime
-                self.elapsedTime += 1
+                if (self.isOn) {
+                    self.elapsedTime += 1
+                }
             }
     }
     
-    public func getTimeString() -> String {
-        let minutes = self.elapsedTime / 60
-        let seconds = self.elapsedTime % 60
-        
-        // %d = integer, 02 = právě dvě číslice, nula zleva pokud potřeba
-        return String(format: "%02d:%02d", minutes, seconds)
+    public func getElapsedTime() -> Int {
+        return self.elapsedTime
     }
     
     public func stop() -> Void {

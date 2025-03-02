@@ -80,5 +80,9 @@ class Cell: ObservableObject
     public func isCorrect() -> Bool {
         return self.value == self.solution
     }
+    
+    public func getSolution() -> Int {
+        return self.solution
+    }
 }
 

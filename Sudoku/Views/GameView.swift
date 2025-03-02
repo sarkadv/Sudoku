@@ -18,12 +18,17 @@ struct GameView: View {
     
     /// timer pro čas řešení aktuálního sudoku
     @StateObject private var timer = GameTimer()
+    /// čas v sekundách poslední dohrané hry
+    @Binding var finalScoreSeconds: Int
     
     /// orientace zařízení
     @Binding var orientation: UIDeviceOrientation
     
     /// světlé / tmavé barevné schéma
     @Environment(\.colorScheme) var colorScheme: ColorScheme
+    
+    /// aplikace v popředí / pozadí
+    @Environment(\.scenePhase) var scenePhase: ScenePhase
     
     /// true - iPhone / false - iPad
     private let isPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone
@@ -41,6 +46,9 @@ struct GameView: View {
         let buttonHeight: CGFloat = isPhone ? 40.0 : 60.0     // výška tlačítka menu
         let buttonColor: Color = (colorScheme == .dark) ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT   // barva tlačítka menu
         let timerFont: Font = isPhone ? .headline : .title
+        
+        // souřadnice buněk viditelných z vybrané buňky uživatelem
+        let visibleCellCoords: [(Int, Int)] = self.board.getVisibleCellCoords(row: self.selectedRow, column: self.selectedColumn)
         
         // landscape mode - hlavní Stack je HStack
         if (orientation.isLandscape) {
@@ -61,6 +69,9 @@ struct GameView: View {
                                 // je buňka uživatelem zvýrazněná?
                                 let highlighted: Bool = self.board.isHighlighted(row: row, column: column)
                                 
+                                // je buňka viditelná z uživatelem vybrané buňky?
+                                let visible: Bool = visibleCellCoords.contains(where: {$0 == (row, column)})
+                                
                                 // je uživatelem určená hodnota správně?
                                 let correct: Bool = self.board.isCorrect(row: row, column: column)
                                 
@@ -77,6 +88,7 @@ struct GameView: View {
                                                selectedRow: self.selectedRow,
                                                selectedColumn: self.selectedColumn,
                                                highlighted: highlighted,
+                                               visible: visible,
                                                correct: correct,
                                                colorScheme: self.colorScheme)
                                 
@@ -100,7 +112,7 @@ struct GameView: View {
                                state: $state)
                         .padding(.bottom, toolsPadding/2)
                     
-                    Text(self.timer.getTimeString())
+                    Text(TimeHelper.getTimeString(seconds: self.timer.getElapsedTime()))
                         .bold()
                         .font(timerFont)
                     
@@ -113,12 +125,18 @@ struct GameView: View {
                               selectedRow: self.selectedRow,
                               selectedColumn: self.selectedColumn,
                               pencilActive: $pencilActive,
+                              state: $state,
+                              finalScoreSeconds: $finalScoreSeconds,
+                              elapsedTime: self.timer.getElapsedTime(),
                               colorScheme: self.colorScheme,
                               orientation: self.orientation)
                     .padding(.top, toolsPadding/2)
                 }
             }
             .onAppear(perform: self.timer.start)
+            .onChange(of: scenePhase) { oldPhase, newPhase in
+                self.handleScenePhaseChange(newPhase: newPhase)
+            }
         }
         // portrait mode - hlavní Stack je VStack
         else {
@@ -130,7 +148,7 @@ struct GameView: View {
                            state: $state)
                     .padding(toolsPadding)
                 
-                Text(self.timer.getTimeString())
+                Text(TimeHelper.getTimeString(seconds: self.timer.getElapsedTime()))
                     .bold()
                     .font(timerFont)
                 
@@ -150,6 +168,9 @@ struct GameView: View {
                                 // je buňka uživatelem zvýrazněná?
                                 let highlighted: Bool = self.board.isHighlighted(row: row, column: column)
                                 
+                                // je buňka viditelná z uživatelem vybrané buňky?
+                                let visible: Bool = visibleCellCoords.contains(where: {$0 == (row, column)})
+                                
                                 // je uživatelem určená hodnota správně?
                                 let correct: Bool = self.board.isCorrect(row: row, column: column)
                                 
@@ -166,6 +187,7 @@ struct GameView: View {
                                                selectedRow: self.selectedRow,
                                                selectedColumn: self.selectedColumn,
                                                highlighted: highlighted,
+                                               visible: visible,
                                                correct: correct,
                                                colorScheme: self.colorScheme)
                                     
@@ -190,11 +212,29 @@ struct GameView: View {
                           selectedRow: self.selectedRow,
                           selectedColumn: self.selectedColumn,
                           pencilActive: $pencilActive,
+                          state: $state,
+                          finalScoreSeconds: $finalScoreSeconds,
+                          elapsedTime: self.timer.getElapsedTime(),
                           colorScheme: self.colorScheme,
                           orientation: self.orientation)
                     .padding(toolsPadding)
             }
             .onAppear(perform: self.timer.start)
+            .onChange(of: scenePhase) { oldPhase, newPhase in
+                handleScenePhaseChange(newPhase: newPhase)
+            }
+        }
+    }
+    
+    /// Pozastaví / nastartuje časovač podle toho, zda je byla aplikace dána do pozadí / popředí.
+    /// - Parameter newPhase: aplikace v popředí / pozadí
+    /// - Returns: Void
+    private func handleScenePhaseChange(newPhase: ScenePhase) -> Void {
+        if newPhase == .background {
+            self.timer.pause()
+        }
+        else if newPhase == .active {
+            self.timer.resume()
         }
     }
 }
@@ -250,6 +290,8 @@ struct SudokuCellView: View {
     
     /// je buňka uživatelem zvýrazněná?
     let highlighted: Bool
+    /// je buňka viditelná z uživatelem vybrané buňky?
+    let visible: Bool
     /// je uživatelem určená hodnota správně?
     let correct: Bool
     
@@ -281,6 +323,7 @@ struct SudokuCellView: View {
                                 // kandidát zobrazen jen pokud je v množině kandidátů
                                 Text("\(number)")
                                     .opacity(numberOpacity)
+                                    .bold()
                             }
                         }
                     }
@@ -306,68 +349,50 @@ struct SudokuCellView: View {
         // barva pro sloupec, řádek a sloupec příslušícím vybrané buňce
         let neighborColor: Color = (self.colorScheme == .dark) ? BOX_COLOR_GREEN_DARK : BOX_COLOR_GREEN_LIGHT
         
-        // pokud je buňka vybraná uživatelem, není potřeba další výpočty
+        // pokud je buňka vybraná uživatelem
         if (self.row == self.selectedRow && self.column == self.selectedColumn) {
             return selectedColor
         }
         
-        // výsledná vrácená barva
-        var resultColor: Color
+        // zvýraznění buňky, pokud se nachází ve stejném sloupci / řádku / boxu jako vybraná buňka
+        if (self.visible) {
+            return neighborColor
+        }
         
         // určení barvy podle příslušnosti buňky k boxu
         if (self.row <= 2) {
             if (self.column <= 2) {
-                resultColor = color1
+                return color1
             }
             else if (self.column <= 5) {
-                resultColor = color2
+                return color2
             }
             else {
-                resultColor = color1
+                return color1
             }
         }
         else if (self.row <= 5) {
             if (self.column <= 2) {
-                resultColor = color2
+                return color2
             }
             else if (self.column <= 5) {
-                resultColor = color1
+                return color1
             }
             else {
-                resultColor = color2
+                return color2
             }
         }
         else {
             if (self.column <= 2) {
-                resultColor = color1
+                return color1
             }
             else if (self.column <= 5) {
-                resultColor = color2
+                return color2
             }
             else {
-                resultColor = color1
+                return color1
             }
         }
-        
-        // zvýraznění buňky, pokud se nachází ve stejném sloupci / řádku / boxu jako vybraná buňka
-        if (self.selectedRow != nil && self.selectedColumn != nil) {
-            // test sloupce nebo řádku
-            if (self.row == self.selectedRow! || self.column == self.selectedColumn!) {
-                resultColor = neighborColor
-            }
-
-            // test boxu
-            let boxStartRow: Int = self.row - (self.row % 3)  // řádek levého horního rohu boxu
-            let boxStartColumn: Int = self.column - (self.column % 3) // sloupec levého horního rohu boxu
-            
-            if ((self.selectedRow! - boxStartRow < 3 && self.selectedRow! - boxStartRow >= 0) &&
-                (self.selectedColumn! - boxStartColumn < 3 && self.selectedColumn! - boxStartColumn >= 0)) {
-                resultColor = neighborColor
-            }
-            
-        }
-        
-        return resultColor
     }
 }
 
@@ -392,6 +417,12 @@ struct ToolsView: View {
     let selectedColumn: Int?
     /// je aktivní nástroj tužka?
     @Binding var pencilActive: Bool
+    /// status aplikace
+    @Binding var state: ViewState
+    /// čas v sekundách poslední dohrané hry
+    @Binding var finalScoreSeconds: Int
+    /// čas aktuální hry
+    let elapsedTime: Int
     
     /// barevné schéma
     let colorScheme: ColorScheme
@@ -510,7 +541,7 @@ struct ToolsView: View {
                                     // událost při kliknutí na číslo
                                     .onTapGesture {
                                         // vyplnění aktuálně vybrané buňky číslem
-                                        self.board.fill(row: self.selectedRow, column: self.selectedColumn, value: number, pencilActive: self.pencilActive)
+                                        self.fillValue(value: number)
                                     }
                             }
                         }
@@ -532,11 +563,24 @@ struct ToolsView: View {
                             // událost při kliknutí na číslo
                             .onTapGesture {
                                 // vyplnění aktuálně vybrané buňky číslem
-                                self.board.fill(row: self.selectedRow, column: self.selectedColumn, value: i, pencilActive: self.pencilActive)
+                                self.fillValue(value: i)
                             }
                     }
                 }
             }
         }
+    }
+    
+    private func fillValue(value: Int) -> Void {
+        self.board.fill(row: self.selectedRow, column: self.selectedColumn, value: value, pencilActive: self.pencilActive)
+        
+        if (self.board.isWin()) {
+            self.handleWin()
+        }
+    }
+    
+    private func handleWin() -> Void {
+        self.finalScoreSeconds = self.elapsedTime   // uložení skóre
+        self.state = .win   // změna obrazovky na vítěznou
     }
 }
