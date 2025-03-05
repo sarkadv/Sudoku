@@ -4,13 +4,19 @@ import Combine
 /// Třída představuje timer pro časování aktuálního sudoku.
 class GameTimer: ObservableObject {
     /// uběhlý čas za aktuální sudoku
-    @Published private var elapsedTime = 0
+    @Published private var elapsedTime: Int
     
     /// timer aktivní / vypnutý
-    @Published private var isOn = false
+    @Published private var isOn: Bool
     
     /// objekt generující událost každou sekundu
     private var timer: AnyCancellable?
+    
+    init(elapsedTime: Int = 0) {
+        self.elapsedTime = elapsedTime
+        self.isOn = false
+        self.timer = nil
+    }
 
     public func start() -> Void {
         if (self.isOn) {

@@ -24,17 +24,18 @@ struct WinView: View {
         let buttonColor: Color = (colorScheme == .dark) ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT   // barva tlačítka menu
         let cornerRadius: CGFloat = isPhone ? 4.0 : 8.0  // zaoblení rohů
         
+        let currentTimeString = TimeHelper.getTimeString(seconds: self.finalScoreSeconds)
+        let bestTimeString = TimeHelper.getTimeString(seconds: StorageManager.getHighscore(difficulty: self.difficulty))
+        
         VStack {
             Text("You won! 👑")
                 .font(.headline)
                 .padding(padding)
             
-            Text("Time: \(TimeHelper.getTimeString(seconds: self.finalScoreSeconds))")
-                .font(.caption)
+            Text("Time: \(currentTimeString)")
                 .padding(.bottom, padding / 2)
             
-            Text("Best time for difficulty \(self.difficulty): 00:30")
-                .font(.caption)
+            Text("Best time for difficulty \(self.difficulty): \(bestTimeString)")
                 .padding(.bottom, padding)
             
             Button(action: {

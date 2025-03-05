@@ -126,6 +126,7 @@ struct GameView: View {
                               selectedColumn: self.selectedColumn,
                               pencilActive: $pencilActive,
                               state: $state,
+                              difficulty: $difficulty,
                               finalScoreSeconds: $finalScoreSeconds,
                               elapsedTime: self.timer.getElapsedTime(),
                               colorScheme: self.colorScheme,
@@ -213,6 +214,7 @@ struct GameView: View {
                           selectedColumn: self.selectedColumn,
                           pencilActive: $pencilActive,
                           state: $state,
+                          difficulty: $difficulty,
                           finalScoreSeconds: $finalScoreSeconds,
                           elapsedTime: self.timer.getElapsedTime(),
                           colorScheme: self.colorScheme,
@@ -419,6 +421,8 @@ struct ToolsView: View {
     @Binding var pencilActive: Bool
     /// status aplikace
     @Binding var state: ViewState
+    /// obtížnost aktuální hry
+    @Binding var difficulty: Difficulty
     /// čas v sekundách poslední dohrané hry
     @Binding var finalScoreSeconds: Int
     /// čas aktuální hry
@@ -581,6 +585,10 @@ struct ToolsView: View {
     
     private func handleWin() -> Void {
         self.finalScoreSeconds = self.elapsedTime   // uložení skóre
+        
+        // pokud jde o nejlepší skóre pro obtížnost -> uložení do perzistentního úložiště
+        StorageManager.setHighscore(difficulty: self.difficulty, seconds: self.elapsedTime)
+        
         self.state = .win   // změna obrazovky na vítěznou
     }
 }
