@@ -47,8 +47,7 @@ struct GameView: View {
         let buttonColor: Color = (colorScheme == .dark) ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT   // barva tlačítka menu
         let timerFont: Font = isPhone ? .headline : .title
         
-        // souřadnice buněk viditelných z vybrané buňky uživatelem
-        let visibleCellCoords: [(Int, Int)] = self.board.getVisibleCellCoords(row: self.selectedRow, column: self.selectedColumn)
+        let visibleCellCoords: [(Int, Int)] = self.getVisibleCellCoords()   // souřadnice buněk viditelných z vybrané buňky uživatelem
         
         // landscape mode - hlavní Stack je HStack
         if (orientation.isLandscape) {
@@ -87,6 +86,7 @@ struct GameView: View {
                                                column: column,
                                                selectedRow: self.selectedRow,
                                                selectedColumn: self.selectedColumn,
+                                               selectedNumber: self.getSelectedNumber(),
                                                highlighted: highlighted,
                                                visible: visible,
                                                correct: correct,
@@ -187,6 +187,7 @@ struct GameView: View {
                                                column: column,
                                                selectedRow: self.selectedRow,
                                                selectedColumn: self.selectedColumn,
+                                               selectedNumber: self.getSelectedNumber(),
                                                highlighted: highlighted,
                                                visible: visible,
                                                correct: correct,
@@ -226,6 +227,30 @@ struct GameView: View {
                 handleScenePhaseChange(newPhase: newPhase)
             }
         }
+    }
+    
+    /// Vrátí hodnotu v buňce vybrané uživatelem nebo nil.
+    /// - Returns: hodnota v buňce vybrané uživatelem / nil pokud uživatel nemá vybranou buňku nebo vybraná buňka nemá hodnotu
+    private func getSelectedNumber() -> Int? {
+        var selectedNumber: Int? = nil
+        
+        if (self.selectedRow != nil && self.selectedColumn != nil) {
+            // uživatel má vybranou buňku
+            selectedNumber = self.board.getValue(row: self.selectedRow!, column: self.selectedColumn!)
+        }
+        
+        if (selectedNumber == 0) {
+            // buňka nemá hodnotu
+            return nil
+        }
+        
+        return selectedNumber
+    }
+    
+    /// - Returns: souřadnice buněk viditelných z vybrané buňky uživatelem
+    private func getVisibleCellCoords() -> [(Int, Int)] {
+        // souřadnice buněk viditelných z vybrané buňky uživatelem
+        return self.board.getVisibleCellCoords(row: self.selectedRow, column: self.selectedColumn)
     }
     
     /// Pozastaví / nastartuje časovač podle toho, zda je byla aplikace dána do pozadí / popředí.
@@ -290,6 +315,9 @@ struct SudokuCellView: View {
     let selectedRow: Int?
     let selectedColumn: Int?
     
+    /// hodnota v uživatelem vybrané buňce
+    let selectedNumber: Int?
+    
     /// je buňka uživatelem zvýrazněná?
     let highlighted: Bool
     /// je buňka viditelná z uživatelem vybrané buňky?
@@ -301,11 +329,16 @@ struct SudokuCellView: View {
     let colorScheme: ColorScheme
     
     var body: some View {
-        let backgroundColor: Color = self.determineCellColor()
-        let valueColor: Color = self.colorScheme == .dark ? .white : .black
+        let backgroundColor: Color = self.determineCellColor()  // barva pozadí buňky
+        
+        // hodnota je zvýrazněna pokud má stejné číslo jako uživatelem právě vybraná buňka
+        let valueColor: Color = (self.value == self.selectedNumber) ? COLOR_SAME_NUMBER : self.colorScheme == .dark ? .white : .black
+        
+        // hodnota je červeně pokud je nesprávná
         let finalValueColor: Color = self.correct ? valueColor : .red
+        
         let finalBorderColor: Color = self.highlighted ? COLOR_HIGHLIGHT : self.borderColor
-        let finalBorderWidth: CGFloat = self.highlighted ? self.borderWidth * 4 : borderWidth
+        let finalBorderWidth: CGFloat = self.highlighted ? self.borderWidth * 4 : borderWidth   // barva hranic buňky
         
         ZStack {
             if value != 0 {
@@ -322,10 +355,14 @@ struct SudokuCellView: View {
                                 let number: Int = row * 3 + col + 1 // kandidát
                                 let numberOpacity: CGFloat = candidates.contains(number) ? 1.0 : 0.0
                                 
+                                // kandidát je zvýrazněn pokud má stejné číslo jako uživatelem právě vybraná buňka
+                                let fontColor: Color = (number == self.selectedNumber) ? COLOR_SAME_NUMBER : self.colorScheme == .dark ? .white : .black
+                                
                                 // kandidát zobrazen jen pokud je v množině kandidátů
                                 Text("\(number)")
                                     .opacity(numberOpacity)
                                     .bold()
+                                    .foregroundStyle(fontColor)
                             }
                         }
                     }

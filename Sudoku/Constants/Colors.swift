@@ -3,6 +3,7 @@ import SwiftUICore
 // konstanty pro barvy
 
 let COLOR_HIGHLIGHT = Color(red: 235/255, green: 52/255, blue: 204/255)
+let COLOR_SAME_NUMBER = Color(red: 4/255, green: 204/255, blue: 197/255)
 
 // light mode
 let COLOR_EASY_LIGHT = Color(red: 140/255, green: 212/255, blue: 159/255)
