@@ -90,6 +90,7 @@ class SudokuFetcher
         let starterGrid: [[Int]] = StorageManager.getContinueGameStarterValues()
         let valueGrid: [[Int]] = StorageManager.getContinueGameValue()
         let solutionGrid: [[Int]] = StorageManager.getContinueGameSolution()
+        let candidates: [[[Int]]] = StorageManager.getContinueGameCandidates()
         
         var cells: [[Cell]] = []
         
@@ -101,7 +102,13 @@ class SudokuFetcher
                 let solution: Int = solutionGrid[row][column]
                 let preFilled: Bool = starterGrid[row][column] != 0
                 
-                cellsRow.append(Cell(row: row, column: column, solution: solution, value: value, preFilled: preFilled))
+                let cell: Cell = Cell(row: row, column: column, solution: solution, value: value, preFilled: preFilled)
+                
+                for candidate in candidates[row][column] {
+                    cell.addCandidate(candidate: candidate)
+                }
+                
+                cellsRow.append(cell)
             }
             
             cells.append(cellsRow)

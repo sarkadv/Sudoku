@@ -14,6 +14,7 @@ class Board: ObservableObject
     /// observed atribut, při změně je mřížka překreslena
     @Published private var change: Int
     
+    /// objekt pro získávání sudoku mřížek připravených ke hře
     private let fetcher: SudokuFetcher
     
     /// Konstruktor pro vytvoření instance sudoku mřížky.
@@ -141,6 +142,8 @@ class Board: ObservableObject
         return self.cells[row][column].isCorrect()
     }
     
+    /// Zkontroluj
+    /// - Returns: true - všechny buňky správně vyplněné (výhra) / jinak false
     public func isWin() -> Bool {
         for i in 0..<self.ROWS {
             for j in 0..<self.COLUMNS {
@@ -239,6 +242,33 @@ class Board: ObservableObject
         return result
     }
     
+    /// - Returns: kandidáti buněk jako 3D pole čísel, buňky bez kandidátů obsahují pouze číslo 0
+    public func getCandidatesAs3DArray() -> [[[Int]]] {
+        var result: [[[Int]]] = []
+        
+        for i in 0..<self.ROWS {
+            var row: [[Int]] = []
+            
+            for j in 0..<self.COLUMNS {
+                let candidates: [Int] = Array(self.cells[i][j].getCandidates())
+                
+                if (candidates.count > 0) {
+                    // buňka má kandidáty
+                    row.append(candidates)
+                }
+                else {
+                    // buňka nemá kandidáty
+                    row.append([0])
+                }
+                
+            }
+            
+            result.append(row)
+        }
+        
+        return result
+    }
+    
     /// Odstraní kanditáty se stejnou hodnotou z buněk viditelných z buňky dané parametrem.
     /// - Parameters:
     ///   - row: řádek buňky
@@ -256,7 +286,8 @@ class Board: ObservableObject
         }
     }
     
-    
+    /// Signalizuje změnu stavu mřížky, aby došlo k překreslení v GameView.
+    /// - Returns: Void
     private func signalizeChange() -> Void {
         self.change += 1
     }

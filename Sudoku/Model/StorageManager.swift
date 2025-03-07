@@ -6,19 +6,32 @@ class StorageManager {
     private static let STRING_INITIALIZER: String = ""
     private static let DIFFICULTY_INITIALIZER: Difficulty = .easy
     
+    // nejnižší čas v sekundách pro každou obtížnost
     @AppStorage("highscoreDemo") private static var highscoreDemo: Int = INT_INITIALIZER
     @AppStorage("highscoreEasy") private static var highscoreEasy: Int = INT_INITIALIZER
     @AppStorage("highscoreMedium") private static var highscoreMedium: Int = INT_INITIALIZER
     @AppStorage("highscoreHard") private static var highscoreHard: Int = INT_INITIALIZER
     
-    @AppStorage("continueGameStored") private static var continueGameStored: Bool = false
-    @AppStorage("continueGameStarterValues") private static var continueGameStarterValues: String = STRING_INITIALIZER
-    @AppStorage("continueGameValue") private static var continueGameValue: String = STRING_INITIALIZER
-    @AppStorage("continueGameSolution") private static var continueGameSolution: String = STRING_INITIALIZER
-    @AppStorage("continueGameDifficulty") private static var continueGameDifficulty: Difficulty = DIFFICULTY_INITIALIZER
-    @AppStorage("continueGameTime") private static var continueGameTime: Int = INT_INITIALIZER
+    // údaje o uložené nedohrané hře
+    @AppStorage("continueGameStored") private static var continueGameStored: Bool = false   // je uložená nedohraná hra?
+    @AppStorage("continueGameStarterValues") private static var continueGameStarterValues: String = STRING_INITIALIZER  // počáteční hodnoty buněk
+    @AppStorage("continueGameValue") private static var continueGameValue: String = STRING_INITIALIZER  // aktuální hodnoty buněk
+    @AppStorage("continueGameSolution") private static var continueGameSolution: String = STRING_INITIALIZER    // řešení buněk
+    @AppStorage("continueGameCandidates") private static var continueGameCandidates: String = STRING_INITIALIZER    // kandidáti všech buněk
+    @AppStorage("continueGameDifficulty") private static var continueGameDifficulty: Difficulty = DIFFICULTY_INITIALIZER    // obtížnost
+    @AppStorage("continueGameTime") private static var continueGameTime: Int = INT_INITIALIZER  // uplynulý čas v sekundách
     
-    public static func addStoredGame(gameStarterValues: [[Int]], gameValue: [[Int]], gameSolution: [[Int]], difficulty: Difficulty, timeSeconds: Int)
+    
+    /// Uloží do perzistentního úložiště nedohranou hru.
+    /// - Parameters:
+    ///   - gameStarterValues: počáteční hodnoty buněk
+    ///   - gameValue: aktuální hodnoty buněk
+    ///   - gameSolution: řešení buněk
+    ///   - candidates: kandidáti všech buněk
+    ///   - difficulty: obtížnost
+    ///   - timeSeconds: uplynulý čas v sekundách
+    /// - Returns: Void
+    public static func addStoredGame(gameStarterValues: [[Int]], gameValue: [[Int]], gameSolution: [[Int]], candidates: [[[Int]]], difficulty: Difficulty, timeSeconds: Int)
     -> Void {
         StorageManager.continueGameStored = true
         StorageManager.continueGameDifficulty = difficulty
@@ -27,6 +40,8 @@ class StorageManager {
         StorageManager.continueGameStarterValues = StringHelper.arrayToString(grid: gameStarterValues)
         StorageManager.continueGameValue = StringHelper.arrayToString(grid: gameValue)
         StorageManager.continueGameSolution = StringHelper.arrayToString(grid: gameSolution)
+        
+        StorageManager.continueGameCandidates = StringHelper.candidatesToString(candidates: candidates)
     }
     
     /// Odstraní z úložiště nedohranou hru, pokud v úložišti je.
@@ -37,6 +52,7 @@ class StorageManager {
             StorageManager.continueGameStarterValues = STRING_INITIALIZER
             StorageManager.continueGameValue = STRING_INITIALIZER
             StorageManager.continueGameSolution = STRING_INITIALIZER
+            StorageManager.continueGameCandidates = STRING_INITIALIZER
             StorageManager.continueGameDifficulty = DIFFICULTY_INITIALIZER
             StorageManager.continueGameTime = INT_INITIALIZER
         }
@@ -54,7 +70,10 @@ class StorageManager {
         return StringHelper.stringTo2DArray(gridString: StorageManager.continueGameSolution)
     }
     
-    /// - Returns: true - existuje uložená nedohraná hra / false jinak
+    public static func getContinueGameCandidates() -> [[[Int]]] {
+        return StringHelper.stringTo3DArray(candidatesString: StorageManager.continueGameCandidates)
+    }
+    
     public static func isContinueGameStored() -> Bool {
         return StorageManager.continueGameStored
     }
@@ -75,6 +94,8 @@ class StorageManager {
         StorageManager.continueGameDifficulty = continueGameDifficulty
     }
     
+    /// - Parameter difficulty: obtížnost hry
+    /// - Returns: nejnižší čas v sekundách podle obtížnosti
     public static func getHighscore(difficulty: Difficulty) -> Int {
         switch difficulty {
             case .demo:

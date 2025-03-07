@@ -125,11 +125,11 @@ struct TitleView: View {
 
 /// zobrazení tlačítek v menu
 struct ButtonsView: View {
-    /// closure pro změnu stavu aplikace
+    /// callback pro změnu stavu aplikace
     let setState: (ViewState) -> Void
-    /// closure pro změnu aktuální obtížnosti hry
+    /// callback pro změnu aktuální obtížnosti hry
     let setDifficulty: (Difficulty) -> Void
-    /// closure pro změnu hodnoty pokračování v minulé nedohrané hře
+    /// callback pro změnu hodnoty pokračování v minulé nedohrané hře
     let setContinuingGame: (Bool) -> Void
     
     /// šířka tlačítka
@@ -149,6 +149,7 @@ struct ButtonsView: View {
         if (StorageManager.isContinueGameStored()) {
             Button(action: {
                 self.setContinuingGame(true)
+                self.setDifficulty(StorageManager.getContinueGameDifficulty())
                 self.setState(.loading)
 
             }) {

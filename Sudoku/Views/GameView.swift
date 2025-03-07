@@ -111,9 +111,9 @@ struct GameView: View {
                                buttonHeight: buttonHeight,
                                cornerRadius: cornerRadius,
                                buttonColor: buttonColor,
-                               saveGame: self.saveGame,
-                               state: $state)
-                        .padding(.bottom, toolsPadding/2)
+                               setState: self.setState,
+                               saveGame: self.saveGame)
+                    .padding(.bottom, toolsPadding/2)
                     
                     Text(TimeHelper.getTimeString(seconds: self.timer.getElapsedTime()))
                         .bold()
@@ -124,13 +124,14 @@ struct GameView: View {
                               borderWidth: borderWidth,
                               toolsPadding: toolsPadding,
                               cornerRadius: cornerRadius,
+                              pencilActive: self.pencilActive,
+                              difficulty: self.difficulty,
                               board: self.board,
                               selectedRow: self.selectedRow,
                               selectedColumn: self.selectedColumn,
-                              pencilActive: $pencilActive,
-                              state: $state,
-                              difficulty: $difficulty,
-                              finalScoreSeconds: $finalScoreSeconds,
+                              setPencilActive: self.setPencilActive,
+                              setState: self.setState,
+                              setFinalScoreSeconds: self.setFinalScoreSeconds,
                               elapsedTime: self.timer.getElapsedTime(),
                               colorScheme: self.colorScheme,
                               orientation: self.orientation)
@@ -151,9 +152,9 @@ struct GameView: View {
                            buttonHeight: buttonHeight,
                            cornerRadius: cornerRadius,
                            buttonColor: buttonColor,
-                           saveGame: self.saveGame,
-                           state: $state)
-                    .padding(toolsPadding)
+                           setState: self.setState,
+                           saveGame: self.saveGame)
+                .padding(toolsPadding)
                 
                 Text(TimeHelper.getTimeString(seconds: self.timer.getElapsedTime()))
                     .bold()
@@ -198,13 +199,13 @@ struct GameView: View {
                                                visible: visible,
                                                correct: correct,
                                                colorScheme: self.colorScheme)
-                                    
-                                    // událost při kliknutí na buňku
-                                    .onTapGesture {
-                                        // update vybrané buňky
-                                        self.selectedRow = row
-                                        self.selectedColumn = column
-                                    }
+                                
+                                // událost při kliknutí na buňku
+                                .onTapGesture {
+                                    // update vybrané buňky
+                                    self.selectedRow = row
+                                    self.selectedColumn = column
+                                }
                             }
                         }
                     }
@@ -216,17 +217,18 @@ struct GameView: View {
                           borderWidth: borderWidth,
                           toolsPadding: toolsPadding,
                           cornerRadius: cornerRadius,
+                          pencilActive: self.pencilActive,
+                          difficulty: self.difficulty,
                           board: self.board,
                           selectedRow: self.selectedRow,
                           selectedColumn: self.selectedColumn,
-                          pencilActive: $pencilActive,
-                          state: $state,
-                          difficulty: $difficulty,
-                          finalScoreSeconds: $finalScoreSeconds,
+                          setPencilActive: self.setPencilActive,
+                          setState: self.setState,
+                          setFinalScoreSeconds: self.setFinalScoreSeconds,
                           elapsedTime: self.timer.getElapsedTime(),
                           colorScheme: self.colorScheme,
                           orientation: self.orientation)
-                    .padding(toolsPadding)
+                .padding(toolsPadding)
             }
             .onAppear {
                 self.timer.start(elapsedTime: self.continuingGame ? StorageManager.getContinueGameTime() : 0)
@@ -274,29 +276,51 @@ struct GameView: View {
         }
     }
     
+    /// Uloží nedohranou hru do perzistentního úložiště.
+    /// - Returns: Void
     private func saveGame() -> Void {
         StorageManager.addStoredGame(gameStarterValues: self.board.getStarterValuesAs2DArray(),
                                      gameValue: self.board.getValueAs2DArray(),
                                      gameSolution: self.board.getSolutionAs2DArray(),
+                                     candidates: self.board.getCandidatesAs3DArray(),
                                      difficulty: self.difficulty,
                                      timeSeconds: self.timer.getElapsedTime())
     }
+    
+    private func setState(state: ViewState) -> Void {
+        self.state = state
+    }
+    
+    private func setDifficulty(difficulty: Difficulty) -> Void {
+        self.difficulty = difficulty
+    }
+    
+    private func setPencilActive(pencilActive: Bool) -> Void {
+        self.pencilActive = pencilActive
+    }
+    
+    private func setFinalScoreSeconds(finalScoreSeconds: Int) -> Void {
+        self.finalScoreSeconds = finalScoreSeconds
+    }
 }
 
+/// tlačítko pro návrat do Menu
 struct MenuButton: View {
     let buttonWidth: CGFloat
     let buttonHeight: CGFloat
     let cornerRadius: CGFloat
     let buttonColor: Color
     
-    let saveGame: () -> Void
+    /// callback pro změnu stavu aplikace
+    let setState: (ViewState) -> Void
     
-    @Binding var state: ViewState
+    /// callback pro uložení nedohrané hry
+    let saveGame: () -> Void
     
     var body: some View {
         Button(action: {
             self.saveGame()
-            self.state = .menu
+            self.setState(.menu)
         }) {
             Text("Menu")
                 .font(.headline)
@@ -467,6 +491,10 @@ struct ToolsView: View {
     let toolsPadding: CGFloat
     /// zaoblení rohů
     let cornerRadius: CGFloat
+    /// je nástroj tužka aktivní?
+    let pencilActive: Bool
+    /// aktuální obtížnost hry
+    let difficulty: Difficulty
     
     /// sudoku mřížka
     let board: Board
@@ -474,14 +502,12 @@ struct ToolsView: View {
     let selectedRow: Int?
     /// sloupec uživatelem vybrané buňky
     let selectedColumn: Int?
-    /// je aktivní nástroj tužka?
-    @Binding var pencilActive: Bool
-    /// status aplikace
-    @Binding var state: ViewState
-    /// obtížnost aktuální hry
-    @Binding var difficulty: Difficulty
+    /// callback pro změnu aktivnosti nástroje tužka
+    let setPencilActive: (Bool) -> Void
+    /// callback pro změnu stavu aplikace
+    let setState: (ViewState) -> Void
     /// čas v sekundách poslední dohrané hry
-    @Binding var finalScoreSeconds: Int
+    let setFinalScoreSeconds: (Int) -> Void
     /// čas aktuální hry
     let elapsedTime: Int
     
@@ -512,7 +538,7 @@ struct ToolsView: View {
                             .cornerRadius(self.cornerRadius)
                             .onTapGesture {
                                 // aktivování / deaktivování nástroje tužka
-                                self.pencilActive = !self.pencilActive
+                                self.setPencilActive(!self.pencilActive)
                             }
                         
                         // nástroj zvýrazňovač
@@ -554,7 +580,7 @@ struct ToolsView: View {
                         .cornerRadius(self.cornerRadius)
                         .onTapGesture {
                             // aktivování / deaktivování nástroje tužka
-                            self.pencilActive = !self.pencilActive
+                            self.setPencilActive(!self.pencilActive)
                         }
                     
                     // nástroj zvýrazňovač
@@ -632,6 +658,9 @@ struct ToolsView: View {
         }
     }
     
+    /// Nastaví hodnotu buňky.
+    /// - Parameter value: hodnota buňky
+    /// - Returns: Void
     private func fillValue(value: Int) -> Void {
         self.board.fill(row: self.selectedRow, column: self.selectedColumn, value: value, pencilActive: self.pencilActive)
         
@@ -640,8 +669,10 @@ struct ToolsView: View {
         }
     }
     
+    /// Zpracuje výhru ve hře.
+    /// - Returns: Void
     private func handleWin() -> Void {
-        self.finalScoreSeconds = self.elapsedTime   // uložení skóre
+        self.setFinalScoreSeconds(self.elapsedTime)   // uložení skóre
         
         // pokud jde o nejlepší skóre pro obtížnost -> uložení do perzistentního úložiště
         StorageManager.setHighscore(difficulty: self.difficulty, seconds: self.elapsedTime)
@@ -649,6 +680,6 @@ struct ToolsView: View {
         // vymazání uložené hry
         StorageManager.removeStoredGame()
         
-        self.state = .win   // změna obrazovky na vítěznou
+        self.setState(.win)   // změna obrazovky na vítěznou
     }
 }
