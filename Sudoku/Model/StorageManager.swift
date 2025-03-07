@@ -2,10 +2,78 @@ import SwiftUI
 
 /// Třída poskytuje perzistentní uložení dat mezi vypnutím a zapnutím aplikace.
 class StorageManager {
-    @AppStorage("highscoreDemo") private static var highscoreDemo: Int = Int.max
-    @AppStorage("highscoreEasy") private static var highscoreEasy: Int = Int.max
-    @AppStorage("highscoreMedium") private static var highscoreMedium: Int = Int.max
-    @AppStorage("highscoreHard") private static var highscoreHard: Int = Int.max
+    private static let INT_INITIALIZER: Int = -1
+    private static let STRING_INITIALIZER: String = ""
+    private static let DIFFICULTY_INITIALIZER: Difficulty = .easy
+    
+    @AppStorage("highscoreDemo") private static var highscoreDemo: Int = INT_INITIALIZER
+    @AppStorage("highscoreEasy") private static var highscoreEasy: Int = INT_INITIALIZER
+    @AppStorage("highscoreMedium") private static var highscoreMedium: Int = INT_INITIALIZER
+    @AppStorage("highscoreHard") private static var highscoreHard: Int = INT_INITIALIZER
+    
+    @AppStorage("continueGameStored") private static var continueGameStored: Bool = false
+    @AppStorage("continueGameStarterValues") private static var continueGameStarterValues: String = STRING_INITIALIZER
+    @AppStorage("continueGameValue") private static var continueGameValue: String = STRING_INITIALIZER
+    @AppStorage("continueGameSolution") private static var continueGameSolution: String = STRING_INITIALIZER
+    @AppStorage("continueGameDifficulty") private static var continueGameDifficulty: Difficulty = DIFFICULTY_INITIALIZER
+    @AppStorage("continueGameTime") private static var continueGameTime: Int = INT_INITIALIZER
+    
+    public static func addStoredGame(gameStarterValues: [[Int]], gameValue: [[Int]], gameSolution: [[Int]], difficulty: Difficulty, timeSeconds: Int)
+    -> Void {
+        StorageManager.continueGameStored = true
+        StorageManager.continueGameDifficulty = difficulty
+        StorageManager.continueGameTime = timeSeconds
+        
+        StorageManager.continueGameStarterValues = StringHelper.arrayToString(grid: gameStarterValues)
+        StorageManager.continueGameValue = StringHelper.arrayToString(grid: gameValue)
+        StorageManager.continueGameSolution = StringHelper.arrayToString(grid: gameSolution)
+    }
+    
+    /// Odstraní z úložiště nedohranou hru, pokud v úložišti je.
+    /// - Returns: Void
+    public static func removeStoredGame() -> Void {
+        if (StorageManager.continueGameStored) {
+            StorageManager.continueGameStored = false
+            StorageManager.continueGameStarterValues = STRING_INITIALIZER
+            StorageManager.continueGameValue = STRING_INITIALIZER
+            StorageManager.continueGameSolution = STRING_INITIALIZER
+            StorageManager.continueGameDifficulty = DIFFICULTY_INITIALIZER
+            StorageManager.continueGameTime = INT_INITIALIZER
+        }
+    }
+    
+    public static func getContinueGameStarterValues() -> [[Int]] {
+        return StringHelper.stringTo2DArray(gridString: StorageManager.continueGameStarterValues)
+    }
+    
+    public static func getContinueGameValue() -> [[Int]] {
+        return StringHelper.stringTo2DArray(gridString: StorageManager.continueGameValue)
+    }
+    
+    public static func getContinueGameSolution() -> [[Int]] {
+        return StringHelper.stringTo2DArray(gridString: StorageManager.continueGameSolution)
+    }
+    
+    /// - Returns: true - existuje uložená nedohraná hra / false jinak
+    public static func isContinueGameStored() -> Bool {
+        return StorageManager.continueGameStored
+    }
+    
+    public static func getContinueGameTime() -> Int {
+        return StorageManager.continueGameTime
+    }
+    
+    public static func setContinueGameTime(continueGameTime: Int) -> Void {
+        StorageManager.continueGameTime = continueGameTime
+    }
+    
+    public static func getContinueGameDifficulty() -> Difficulty {
+        return StorageManager.continueGameDifficulty
+    }
+    
+    public static func setContinueGameDifficulty(continueGameDifficulty: Difficulty) -> Void {
+        StorageManager.continueGameDifficulty = continueGameDifficulty
+    }
     
     public static func getHighscore(difficulty: Difficulty) -> Int {
         switch difficulty {

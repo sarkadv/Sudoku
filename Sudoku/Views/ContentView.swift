@@ -8,6 +8,8 @@ struct ContentView: View {
     @State private var difficulty: Difficulty = .easy
     /// aktuální sudoku mřížka - observable object
     @StateObject private var board: Board = Board()
+    /// pokračování v minulé nedohrané hře?
+    @State private var continuingGame: Bool = false
     /// čas v sekundách poslední dohrané hry
     @State private var finalScoreSeconds: Int = 0
     
@@ -18,16 +20,16 @@ struct ContentView: View {
         VStack {
             // výběr okna podle stavu aplikace
             if (state == .menu) {
-                MenuView(state: $state, difficulty: $difficulty, orientation: $orientation)
+                MenuView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, orientation: $orientation)
                     .environmentObject(board)
             }
             
             else if (state == .loading) {
-                LoadingView(state: $state, difficulty: $difficulty)
+                LoadingView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame)
                     .environmentObject(board)
             }
             else if (state == .game) {
-                GameView(state: $state, difficulty: $difficulty, finalScoreSeconds: $finalScoreSeconds, orientation: $orientation)
+                GameView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, finalScoreSeconds: $finalScoreSeconds, orientation: $orientation)
                     .environmentObject(board)
             }
             else if (state == .win) {

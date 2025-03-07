@@ -34,6 +34,12 @@ class Board: ObservableObject
         self.cells = result
     }
     
+    /// Vezme z perzistentního úložiště rozehranou uloženou hru.
+    /// - Returns: Void
+    public func continueGame() -> Void {
+        self.cells = self.fetcher.fetchContinueGame()
+    }
+    
     /// Přidá / odstraní z buňky hodnotu / kandidáta. K odstranění dojde pokud se již číslo v dané buňce nachází.
     /// - Parameters:
     ///   - row: řádek buňky
@@ -176,6 +182,58 @@ class Board: ObservableObject
                     result.append((i, j))
                 }
             }
+        }
+        
+        return result
+    }
+    
+    /// - Returns: aktuální hodnota buněk jako 2D pole čísel
+    public func getValueAs2DArray() -> [[Int]] {
+        var result: [[Int]] = []
+        
+        for i in 0..<self.ROWS {
+            var row: [Int] = []
+            
+            for j in 0..<self.COLUMNS {
+                row.append(self.cells[i][j].getValue())
+            }
+            
+            result.append(row)
+        }
+        
+        return result
+    }
+    
+    /// - Returns: řešení buněk jako 2D pole čísel
+    public func getSolutionAs2DArray() -> [[Int]] {
+        var result: [[Int]] = []
+        
+        for i in 0..<self.ROWS {
+            var row: [Int] = []
+            
+            for j in 0..<self.COLUMNS {
+                row.append(self.cells[i][j].getSolution())
+            }
+            
+            result.append(row)
+        }
+        
+        return result
+    }
+    
+    /// - Returns: počáteční hodnota buněk jako 2D pole čísel
+    public func getStarterValuesAs2DArray() -> [[Int]] {
+        var result: [[Int]] = []
+        
+        for i in 0..<self.ROWS {
+            var row: [Int] = []
+            
+            for j in 0..<self.COLUMNS {
+                let value: Int = self.cells[i][j].isPreFilled() ? self.cells[i][j].getValue() : 0
+                row.append(value)
+            }
+            
+            result.append(row)
         }
         
         return result

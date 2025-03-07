@@ -85,6 +85,31 @@ class SudokuFetcher
         
     }
     
+    /// - Returns: rozehrané sudoku z perzistentního úložiště
+    public func fetchContinueGame() -> [[Cell]] {
+        let starterGrid: [[Int]] = StorageManager.getContinueGameStarterValues()
+        let valueGrid: [[Int]] = StorageManager.getContinueGameValue()
+        let solutionGrid: [[Int]] = StorageManager.getContinueGameSolution()
+        
+        var cells: [[Cell]] = []
+        
+        for row in 0..<valueGrid.count {
+            var cellsRow: [Cell] = []
+            
+            for column in 0..<valueGrid[row].count {
+                let value: Int = valueGrid[row][column]
+                let solution: Int = solutionGrid[row][column]
+                let preFilled: Bool = starterGrid[row][column] != 0
+                
+                cellsRow.append(Cell(row: row, column: column, solution: solution, value: value, preFilled: preFilled))
+            }
+            
+            cells.append(cellsRow)
+        }
+        
+        return cells
+    }
+    
     /// Vrátí náhodné sudoku dané obtížnosti z textového souboru.
     /// - Parameter difficulty: požadovaná obtížnost
     /// - Returns: sudoku ze souboru

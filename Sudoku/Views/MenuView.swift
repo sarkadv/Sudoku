@@ -6,6 +6,8 @@ struct MenuView: View {
     @Binding var state: ViewState
     /// aktuální obtížnost hry
     @Binding var difficulty: Difficulty
+    /// pokračování v minulé nedohrané hře?
+    @Binding var continuingGame: Bool
     
     /// aktuální sudoku mřížka
     @EnvironmentObject var board: Board
@@ -23,11 +25,12 @@ struct MenuView: View {
         let spacing: CGFloat = isPhone ? 20.0 : 30.0    // velikost mezery mezi tlačítky
         let imageSize: CGFloat = isPhone ? 200.0 : 400.0    // velikost úvodního obrázku
         let imageName: String = (colorScheme == .dark) ? "sudoku_dark" : "sudoku_light" // úvodní obrázek
-        let buttonWidth: CGFloat = isPhone ? 150.0 : 350.0  // šířka tlačítka
-        let buttonHeight: CGFloat = isPhone ? 40.0 : 60.0   // výška tlačítka
+        let buttonWidth: CGFloat = isPhone ? 200.0 : 350.0  // šířka tlačítka
+        let buttonHeight: CGFloat = isPhone ? 35.0 : 60.0   // výška tlačítka
         let titleFontSize: CGFloat = isPhone ? 30.0 : 50.0  // velikost nadpisu
         
         // barvy tlačítek
+        let buttonContinueColor: Color = (colorScheme == .dark) ? BOX_COLOR_PURPLE_DARK : BOX_COLOR_PURPLE_LIGHT
         let buttonEasyColor: Color = (colorScheme == .dark) ? COLOR_EASY_DARK : COLOR_EASY_LIGHT
         let buttonMediumColor: Color = (colorScheme == .dark) ? COLOR_MEDIUM_DARK : COLOR_MEDIUM_LIGHT
         let buttonHardColor: Color = (colorScheme == .dark) ? COLOR_HARD_DARK : COLOR_HARD_LIGHT
@@ -44,10 +47,12 @@ struct MenuView: View {
                 }
                 
                 VStack (spacing: spacing) {
-                    ButtonsView(state: self.$state,
-                                difficulty: self.$difficulty,
+                    ButtonsView(setState: self.setState,
+                                setDifficulty: self.setDifficulty,
+                                setContinuingGame: self.setContinuingGame,
                                 buttonWidth: buttonWidth,
                                 buttonHeight: buttonHeight,
+                                buttonContinueColor: buttonContinueColor,
                                 buttonEasyColor: buttonEasyColor,
                                 buttonMediumColor: buttonMediumColor,
                                 buttonHardColor: buttonHardColor,
@@ -63,10 +68,12 @@ struct MenuView: View {
                 
                 TitleView(fontSize: titleFontSize)
                 
-                ButtonsView(state: self.$state,
-                            difficulty: self.$difficulty,
+                ButtonsView(setState: self.setState,
+                            setDifficulty: self.setDifficulty,
+                            setContinuingGame: self.setContinuingGame,
                             buttonWidth: buttonWidth,
                             buttonHeight: buttonHeight,
+                            buttonContinueColor: buttonContinueColor,
                             buttonEasyColor: buttonEasyColor,
                             buttonMediumColor: buttonMediumColor,
                             buttonHardColor: buttonHardColor,
@@ -74,6 +81,18 @@ struct MenuView: View {
                             buttonSettingsColor: buttonSettingsColor)
             }
         }
+    }
+    
+    private func setState(state: ViewState) -> Void {
+        self.state = state
+    }
+    
+    private func setDifficulty(difficulty: Difficulty) -> Void {
+        self.difficulty = difficulty
+    }
+    
+    private func setContinuingGame(continuingGame: Bool) -> Void {
+        self.continuingGame = continuingGame
     }
 }
 
@@ -106,10 +125,12 @@ struct TitleView: View {
 
 /// zobrazení tlačítek v menu
 struct ButtonsView: View {
-    /// stav aplikace
-    @Binding var state: ViewState
-    /// aktuální obtížnost hry
-    @Binding var difficulty: Difficulty
+    /// closure pro změnu stavu aplikace
+    let setState: (ViewState) -> Void
+    /// closure pro změnu aktuální obtížnosti hry
+    let setDifficulty: (Difficulty) -> Void
+    /// closure pro změnu hodnoty pokračování v minulé nedohrané hře
+    let setContinuingGame: (Bool) -> Void
     
     /// šířka tlačítka
     let buttonWidth: CGFloat
@@ -117,6 +138,7 @@ struct ButtonsView: View {
     let buttonHeight: CGFloat
     
     // barvy tlačítek
+    let buttonContinueColor: Color
     let buttonEasyColor: Color
     let buttonMediumColor: Color
     let buttonHardColor: Color
@@ -124,9 +146,26 @@ struct ButtonsView: View {
     let buttonSettingsColor: Color
     
     var body: some View {
+        if (StorageManager.isContinueGameStored()) {
+            Button(action: {
+                self.setContinuingGame(true)
+                self.setState(.loading)
+
+            }) {
+                Text("Continue (\(StorageManager.getContinueGameDifficulty().toString()))")
+                    .font(.headline)
+                    .padding()
+                    .frame(width: buttonWidth, height: buttonHeight)
+                    .background(buttonContinueColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+        }
+        
         Button(action: {
-            self.difficulty = .easy
-            self.state = .loading
+            self.setContinuingGame(false)
+            self.setDifficulty(.easy)
+            self.setState(.loading)
         }) {
             Text("Easy")
                 .font(.headline)
@@ -139,8 +178,9 @@ struct ButtonsView: View {
         
         // střední obtížnost
         Button(action: {
-            self.difficulty = .medium
-            self.state = .loading
+            self.setContinuingGame(false)
+            self.setDifficulty(.medium)
+            self.setState(.loading)
         }) {
             Text("Medium")
                 .font(.headline)
@@ -153,8 +193,9 @@ struct ButtonsView: View {
         
         // těžká obtížnost
         Button(action: {
-            self.difficulty = .hard
-            self.state = .loading
+            self.setContinuingGame(false)
+            self.setDifficulty(.hard)
+            self.setState(.loading)
         }) {
             Text("Hard")
                 .font(.headline)
@@ -167,8 +208,9 @@ struct ButtonsView: View {
         
         // demo obtížnost
         Button(action: {
-            self.difficulty = .demo
-            self.state = .loading
+            self.setContinuingGame(false)
+            self.setDifficulty(.demo)
+            self.setState(.loading)
         }) {
             Text("Demo")
                 .font(.headline)
@@ -181,7 +223,7 @@ struct ButtonsView: View {
         
         // nastavení
         Button(action: {
-            self.state = .settings
+            self.setState(.settings)
         }) {
             Text("Settings")
                 .font(.headline)

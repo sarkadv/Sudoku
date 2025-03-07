@@ -57,45 +57,10 @@ class CSVLoader
         let solutionString = columns[2]
         
         // 81 čísel je převedeno na 9x9 pole
-        let valueGrid = convertTo2DArray(gridString: valueString)
-        let solutionGrid = convertTo2DArray(gridString: solutionString)
+        let valueGrid = StringHelper.stringTo2DArray(gridString: valueString)
+        let solutionGrid = StringHelper.stringTo2DArray(gridString: solutionString)
         
         return FileResponse(value: valueGrid, solution: solutionGrid, difficulty: difficulty)
-    }
-    
-    /// Řetězec skládající se z 81 čísel převede na 9x9 pole.
-    /// - Parameter gridString: řetězec 81 čísel
-    /// - Returns: 9x9 pole čísel
-    private func convertTo2DArray(gridString: String) -> [[Int]] {
-        var grid: [[Int]] = []
-        var row: [Int] = []
-        
-        for i in 0..<gridString.count
-        {
-            // index do řetězce
-            let index: String.Index = gridString.index(gridString.startIndex, offsetBy: i)
-            
-            // znak na daném indexu
-            let char: Character = gridString[index]
-            
-            // převod znaku na číslo
-            let num: Int? = Int(String(char))
-            
-            if num != nil {
-                row.append(num!)
-            }
-            
-            if row.count == 9
-            {
-                // bylo přidáno 9 čísel, řádek je hotový
-                grid.append(row)
-                
-                // reset řádku
-                row = []
-            }
-        }
-        
-        return grid
     }
 }
 

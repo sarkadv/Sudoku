@@ -6,6 +6,8 @@ struct GameView: View {
     @Binding var state: ViewState
     /// aktuální obtížnost hry
     @Binding var difficulty: Difficulty
+    /// pokračování v minulé nedohrané hře?
+    @Binding var continuingGame: Bool
     /// aktuální sudoku mřížka - observed object, při změně je překreslena mřížka
     @EnvironmentObject var board: Board
     
@@ -109,6 +111,7 @@ struct GameView: View {
                                buttonHeight: buttonHeight,
                                cornerRadius: cornerRadius,
                                buttonColor: buttonColor,
+                               saveGame: self.saveGame,
                                state: $state)
                         .padding(.bottom, toolsPadding/2)
                     
@@ -134,7 +137,9 @@ struct GameView: View {
                     .padding(.top, toolsPadding/2)
                 }
             }
-            .onAppear(perform: self.timer.start)
+            .onAppear {
+                self.timer.start(elapsedTime: self.continuingGame ? StorageManager.getContinueGameTime() : 0)
+            }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 self.handleScenePhaseChange(newPhase: newPhase)
             }
@@ -146,6 +151,7 @@ struct GameView: View {
                            buttonHeight: buttonHeight,
                            cornerRadius: cornerRadius,
                            buttonColor: buttonColor,
+                           saveGame: self.saveGame,
                            state: $state)
                     .padding(toolsPadding)
                 
@@ -222,7 +228,9 @@ struct GameView: View {
                           orientation: self.orientation)
                     .padding(toolsPadding)
             }
-            .onAppear(perform: self.timer.start)
+            .onAppear {
+                self.timer.start(elapsedTime: self.continuingGame ? StorageManager.getContinueGameTime() : 0)
+            }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 handleScenePhaseChange(newPhase: newPhase)
             }
@@ -253,16 +261,25 @@ struct GameView: View {
         return self.board.getVisibleCellCoords(row: self.selectedRow, column: self.selectedColumn)
     }
     
-    /// Pozastaví / nastartuje časovač podle toho, zda je byla aplikace dána do pozadí / popředí.
+    /// Pozastaví / nastartuje časovač a uloží hru podle toho, zda je byla aplikace dána do pozadí / popředí.
     /// - Parameter newPhase: aplikace v popředí / pozadí
     /// - Returns: Void
     private func handleScenePhaseChange(newPhase: ScenePhase) -> Void {
         if newPhase == .background {
             self.timer.pause()
+            self.saveGame()
         }
         else if newPhase == .active {
             self.timer.resume()
         }
+    }
+    
+    private func saveGame() -> Void {
+        StorageManager.addStoredGame(gameStarterValues: self.board.getStarterValuesAs2DArray(),
+                                     gameValue: self.board.getValueAs2DArray(),
+                                     gameSolution: self.board.getSolutionAs2DArray(),
+                                     difficulty: self.difficulty,
+                                     timeSeconds: self.timer.getElapsedTime())
     }
 }
 
@@ -272,10 +289,13 @@ struct MenuButton: View {
     let cornerRadius: CGFloat
     let buttonColor: Color
     
+    let saveGame: () -> Void
+    
     @Binding var state: ViewState
     
     var body: some View {
         Button(action: {
+            self.saveGame()
             self.state = .menu
         }) {
             Text("Menu")
@@ -386,7 +406,7 @@ struct SudokuCellView: View {
         let selectedColor: Color = (self.colorScheme == .dark) ? .black : .white
         
         // barva pro sloupec, řádek a sloupec příslušícím vybrané buňce
-        let neighborColor: Color = (self.colorScheme == .dark) ? BOX_COLOR_GREEN_DARK : BOX_COLOR_GREEN_LIGHT
+        let neighborColor: Color = (self.colorScheme == .dark) ? BOX_COLOR_GREEN_DARK.opacity(0.75) : BOX_COLOR_GREEN_LIGHT.opacity(0.75)
         
         // pokud je buňka vybraná uživatelem
         if (self.row == self.selectedRow && self.column == self.selectedColumn) {
@@ -625,6 +645,9 @@ struct ToolsView: View {
         
         // pokud jde o nejlepší skóre pro obtížnost -> uložení do perzistentního úložiště
         StorageManager.setHighscore(difficulty: self.difficulty, seconds: self.elapsedTime)
+        
+        // vymazání uložené hry
+        StorageManager.removeStoredGame()
         
         self.state = .win   // změna obrazovky na vítěznou
     }
