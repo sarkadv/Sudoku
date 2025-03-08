@@ -36,7 +36,6 @@ class Board: ObservableObject
     }
     
     /// Vezme z perzistentního úložiště rozehranou uloženou hru.
-    /// - Returns: Void
     public func continueGame() -> Void {
         self.cells = self.fetcher.fetchContinueGame()
     }
@@ -47,7 +46,6 @@ class Board: ObservableObject
     ///   - column: sloupec buňky
     ///   - value: přidávaná hodnota / kandidát
     ///   - pencilActive: true - přidávané číslo je kandidát / false - přidávané číslo je hodnota
-    /// - Returns: Void
     public func fill(row: Int?, column: Int?, value: Int, pencilActive: Bool = false) -> Void {
         if (row == nil || column == nil) {
             return
@@ -96,7 +94,6 @@ class Board: ObservableObject
     /// - Parameters:
     ///   - row: aktuálně vybraný řádek
     ///   - column: aktuálně vybraný sloupec
-    /// - Returns: Void
     public func highlight(row: Int?, column: Int?) -> Void {
         if (row == nil || column == nil) {
             return
@@ -108,7 +105,6 @@ class Board: ObservableObject
     }
     
     /// Odstraní zvýraznění ze všech buněk.
-    /// - Returns: Void
     public func removeAllHighlights() -> Void {
         for row in 0..<ROWS {
             for column in 0..<COLUMNS {

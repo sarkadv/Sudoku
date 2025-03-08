@@ -54,7 +54,7 @@ class StringHelper {
     }
     
     /// 9x9x9 pole převede na řetězec skládající se z kandidátů pro každou buňku
-    /// - Parameter grid: 9x9x9 pole kanditátů
+    /// - Parameter candidates: 9x9x9 pole kanditátů
     /// - Returns: řetězec kandidátů, jednotlivé buňky odděleny středníkem
     public static func candidatesToString(candidates: [[[Int]]]) -> String {
         var result: String = ""

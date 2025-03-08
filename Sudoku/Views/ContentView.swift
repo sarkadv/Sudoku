@@ -13,36 +13,63 @@ struct ContentView: View {
     /// čas v sekundách poslední dohrané hry
     @State private var finalScoreSeconds: Int = 0
     
+    /// správce barevného módu
+    @StateObject private var colorModeManager: ColorModeManager = ColorModeManager()
+    /// pro nastavení colorModeManager
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    
     /// orientace zařízení
     @State private var orientation: UIDeviceOrientation = UIDevice.current.orientation
     
     var body: some View {
-        VStack {
-            // výběr okna podle stavu aplikace
-            if (state == .menu) {
-                MenuView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, orientation: $orientation)
-                    .environmentObject(board)
+        ZStack {
+            // barva pozadí podle barevného módu
+            if (self.colorModeManager.isDarkMode) {
+                Color.black.ignoresSafeArea()
+            }
+            else {
+                Color.white.ignoresSafeArea()
             }
             
-            else if (state == .loading) {
-                LoadingView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame)
-                    .environmentObject(board)
+            VStack {
+                // výběr okna podle stavu aplikace
+                if (state == .menu) {
+                    MenuView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, orientation: $orientation)
+                        .environmentObject(board)
+                        .environmentObject(colorModeManager)
+                }
+                
+                else if (state == .loading) {
+                    LoadingView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame)
+                        .environmentObject(board)
+                        .environmentObject(colorModeManager)
+                }
+                else if (state == .game) {
+                    GameView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, finalScoreSeconds: $finalScoreSeconds, orientation: $orientation)
+                        .environmentObject(board)
+                        .environmentObject(colorModeManager)
+                }
+                else if (state == .win) {
+                    WinView(state: $state, difficulty: $difficulty, finalScoreSeconds: $finalScoreSeconds)
+                        .environmentObject(colorModeManager)
+                }
+                else if (state == .settings) {
+                    SettingsView(state: $state)
+                        .environmentObject(colorModeManager)
+                }
             }
-            else if (state == .game) {
-                GameView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, finalScoreSeconds: $finalScoreSeconds, orientation: $orientation)
-                    .environmentObject(board)
+            .onAppear {
+                // při zobrazení update orientace zařízení
+                updateOrientation()
+                updateDeviceColorMode()
             }
-            else if (state == .win) {
-                WinView(state: $state, difficulty: $difficulty, finalScoreSeconds: $finalScoreSeconds)
+            .onChange(of: colorScheme) {
+                updateDeviceColorMode()
             }
-        }
-        .onAppear {
-            // při zobrazení update orientace zařízení
-            updateOrientation()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-            // při změně orientace update orientace zařízení
-            updateOrientation()
+            .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
+                // při změně orientace update orientace zařízení
+                updateOrientation()
+            }
         }
     }
     
@@ -58,6 +85,10 @@ struct ContentView: View {
         }
         
         self.orientation = currentOrientation
+    }
+    
+    private func updateDeviceColorMode() {
+        self.colorModeManager.setDeviceColorMode(deviceColorMode: self.colorScheme == .dark ? .dark : .light)
     }
 }
 

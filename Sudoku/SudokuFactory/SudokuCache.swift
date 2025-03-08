@@ -30,7 +30,6 @@ class SudokuCache
     /// Přidá sudoku zabalené v objektu response do apiCache, pokud je zde dostatek místa.
     /// - Parameters:
     ///   - response: objekt s informacemi o sudoku
-    /// - Returns: Void
     public func addToApiCache(response: Response) -> Void {
         let count: Int = self.apiCache[response.getDifficulty()]!.count
         

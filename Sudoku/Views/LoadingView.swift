@@ -11,21 +11,23 @@ struct LoadingView: View {
     /// aktuální sudoku mřížka
     @EnvironmentObject var board: Board
     
-    /// světlé / tmavé barevné schéma
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    /// správce barevného módu
+    @EnvironmentObject var colorModeManager: ColorModeManager
+    
     /// velikost displeje
     @Environment(\.horizontalSizeClass) var sizeClass: UserInterfaceSizeClass?
     
     var body: some View {
-        let loadingBarColor: Color = (colorScheme == .dark) ? .white : .black  // barva loading baru
+        let fontColor: Color = self.colorModeManager.isDarkMode ? .white : .black  // barva fontu
         
         VStack {
             Text("Loading...")
                 .font(.headline)
+                .foregroundStyle(fontColor)
                 .padding()
             
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: loadingBarColor))
+                .progressViewStyle(CircularProgressViewStyle(tint: fontColor))
                 .scaleEffect(2)
                 .padding()
         }

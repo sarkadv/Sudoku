@@ -15,8 +15,8 @@ struct MenuView: View {
     /// orientace zařízení
     @Binding var orientation: UIDeviceOrientation
     
-    /// světlé / tmavé barevné schéma
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    /// správce barevného módu
+    @EnvironmentObject var colorModeManager: ColorModeManager
     
     /// true - iPhone / false - iPad
     private let isPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone
@@ -24,18 +24,19 @@ struct MenuView: View {
     var body: some View {
         let spacing: CGFloat = isPhone ? 20.0 : 30.0    // velikost mezery mezi tlačítky
         let imageSize: CGFloat = isPhone ? 200.0 : 400.0    // velikost úvodního obrázku
-        let imageName: String = (colorScheme == .dark) ? "sudoku_dark" : "sudoku_light" // úvodní obrázek
+        let imageName: String = self.colorModeManager.isDarkMode ? "sudoku_dark" : "sudoku_light" // úvodní obrázek
         let buttonWidth: CGFloat = isPhone ? 200.0 : 350.0  // šířka tlačítka
         let buttonHeight: CGFloat = isPhone ? 35.0 : 60.0   // výška tlačítka
         let titleFontSize: CGFloat = isPhone ? 30.0 : 50.0  // velikost nadpisu
+        let fontColor: Color = self.colorModeManager.isDarkMode ? .white : .black   // barva fontu
         
         // barvy tlačítek
-        let buttonContinueColor: Color = (colorScheme == .dark) ? BOX_COLOR_PURPLE_DARK : BOX_COLOR_PURPLE_LIGHT
-        let buttonEasyColor: Color = (colorScheme == .dark) ? COLOR_EASY_DARK : COLOR_EASY_LIGHT
-        let buttonMediumColor: Color = (colorScheme == .dark) ? COLOR_MEDIUM_DARK : COLOR_MEDIUM_LIGHT
-        let buttonHardColor: Color = (colorScheme == .dark) ? COLOR_HARD_DARK : COLOR_HARD_LIGHT
-        let buttonDemoColor: Color = (colorScheme == .dark) ? COLOR_DEMO_DARK : COLOR_DEMO_LIGHT
-        let buttonSettingsColor: Color = (colorScheme == .dark) ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT
+        let buttonContinueColor: Color = self.colorModeManager.isDarkMode ? BOX_COLOR_PURPLE_DARK : BOX_COLOR_PURPLE_LIGHT
+        let buttonEasyColor: Color = self.colorModeManager.isDarkMode ? COLOR_EASY_DARK : COLOR_EASY_LIGHT
+        let buttonMediumColor: Color = self.colorModeManager.isDarkMode ? COLOR_MEDIUM_DARK : COLOR_MEDIUM_LIGHT
+        let buttonHardColor: Color = self.colorModeManager.isDarkMode ? COLOR_HARD_DARK : COLOR_HARD_LIGHT
+        let buttonDemoColor: Color = self.colorModeManager.isDarkMode ? COLOR_DEMO_DARK : COLOR_DEMO_LIGHT
+        let buttonSettingsColor: Color = self.colorModeManager.isDarkMode ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT
         
         // landscape mode
         if (orientation.isLandscape) {
@@ -43,7 +44,7 @@ struct MenuView: View {
                 VStack (spacing: 0) {
                     ImageView(imageName: imageName, imageSize: imageSize)
                     
-                    TitleView(fontSize: titleFontSize)
+                    TitleView(fontSize: titleFontSize, fontColor: fontColor)
                 }
                 
                 VStack (spacing: spacing) {
@@ -66,7 +67,7 @@ struct MenuView: View {
             VStack (spacing: spacing) {
                 ImageView(imageName: imageName, imageSize: imageSize)
                 
-                TitleView(fontSize: titleFontSize)
+                TitleView(fontSize: titleFontSize, fontColor: fontColor)
                 
                 ButtonsView(setState: self.setState,
                             setDifficulty: self.setDifficulty,
@@ -115,11 +116,13 @@ struct ImageView: View {
 /// zobrazení názvu hry
 struct TitleView: View {
     let fontSize: CGFloat
+    let fontColor: Color
     
     var body: some View {
         Text("sudoku")
             .padding()
             .font(.system(size: fontSize))
+            .foregroundStyle(fontColor)
     }
 }
 

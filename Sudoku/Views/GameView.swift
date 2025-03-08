@@ -26,8 +26,8 @@ struct GameView: View {
     /// orientace zařízení
     @Binding var orientation: UIDeviceOrientation
     
-    /// světlé / tmavé barevné schéma
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    /// správce barevného módu
+    @EnvironmentObject var colorModeManager: ColorModeManager
     
     /// aplikace v popředí / pozadí
     @Environment(\.scenePhase) var scenePhase: ScenePhase
@@ -38,7 +38,7 @@ struct GameView: View {
     var body: some View {
         let cellSize: CGFloat = isPhone ? 35.0 : 65.0   // velikost buňky
         let borderWidth: CGFloat = isPhone ? 1.0 : 2.0  // šířka ohraničení
-        let borderColor: Color = (colorScheme == .dark) ? .white : .black   // barva ohraničení
+        let borderColor: Color = self.colorModeManager.isDarkMode ? .white : .black   // barva ohraničení
         let valueFontSize: CGFloat = isPhone ? 24.0 : 40.0  // velikost číselné hodnoty buňky
         let candidatesFontSize: CGFloat = isPhone ? 8 : 16.0  // velikost kandidátů na hodnotu buňky
         let candidatesHSpacing: CGFloat = isPhone ? 3.5 : 8.0   // horizontální prostor mezi kandidáty
@@ -46,8 +46,9 @@ struct GameView: View {
         let cornerRadius: CGFloat = isPhone ? 4.0 : 8.0  // zaoblení rohů
         let buttonWidth: CGFloat = isPhone ? 125.0 : 300.0  // šířka tlačítka menu
         let buttonHeight: CGFloat = isPhone ? 40.0 : 60.0     // výška tlačítka menu
-        let buttonColor: Color = (colorScheme == .dark) ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT   // barva tlačítka menu
+        let buttonColor: Color = self.colorModeManager.isDarkMode ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT   // barva tlačítka menu
         let timerFont: Font = isPhone ? .headline : .title
+        let timerFontColor: Color = self.colorModeManager.isDarkMode ? .white : .black
         
         let visibleCellCoords: [(Int, Int)] = self.getVisibleCellCoords()   // souřadnice buněk viditelných z vybrané buňky uživatelem
         
@@ -92,7 +93,7 @@ struct GameView: View {
                                                highlighted: highlighted,
                                                visible: visible,
                                                correct: correct,
-                                               colorScheme: self.colorScheme)
+                                               colorModeManager: self.colorModeManager)
                                 
                                 // událost při kliknutí na buňku
                                 .onTapGesture {
@@ -115,9 +116,7 @@ struct GameView: View {
                                saveGame: self.saveGame)
                     .padding(.bottom, toolsPadding/2)
                     
-                    Text(TimeHelper.getTimeString(seconds: self.timer.getElapsedTime()))
-                        .bold()
-                        .font(timerFont)
+                    TimerText(elapsedTime: self.timer.getElapsedTime(), timerFont: timerFont, timerFontColor: timerFontColor)
                     
                     ToolsView(fontSize: valueFontSize,
                               cellSize: cellSize,
@@ -133,13 +132,13 @@ struct GameView: View {
                               setState: self.setState,
                               setFinalScoreSeconds: self.setFinalScoreSeconds,
                               elapsedTime: self.timer.getElapsedTime(),
-                              colorScheme: self.colorScheme,
+                              colorModeManager: self.colorModeManager,
                               orientation: self.orientation)
                     .padding(.top, toolsPadding/2)
                 }
             }
             .onAppear {
-                self.timer.start(elapsedTime: self.continuingGame ? StorageManager.getContinueGameTime() : 0)
+                self.timer.start(elapsedTime: self.continuingGame ? StorageManager.getContinueGameTime() : self.timer.getElapsedTime())
             }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 self.handleScenePhaseChange(newPhase: newPhase)
@@ -156,9 +155,7 @@ struct GameView: View {
                            saveGame: self.saveGame)
                 .padding(toolsPadding)
                 
-                Text(TimeHelper.getTimeString(seconds: self.timer.getElapsedTime()))
-                    .bold()
-                    .font(timerFont)
+                TimerText(elapsedTime: self.timer.getElapsedTime(), timerFont: timerFont, timerFontColor: timerFontColor)
                 
                 VStack (spacing: 0) {
                     ForEach(0..<self.board.ROWS, id: \.self) { row in
@@ -198,7 +195,7 @@ struct GameView: View {
                                                highlighted: highlighted,
                                                visible: visible,
                                                correct: correct,
-                                               colorScheme: self.colorScheme)
+                                               colorModeManager: self.colorModeManager)
                                 
                                 // událost při kliknutí na buňku
                                 .onTapGesture {
@@ -226,12 +223,12 @@ struct GameView: View {
                           setState: self.setState,
                           setFinalScoreSeconds: self.setFinalScoreSeconds,
                           elapsedTime: self.timer.getElapsedTime(),
-                          colorScheme: self.colorScheme,
+                          colorModeManager: self.colorModeManager,
                           orientation: self.orientation)
                 .padding(toolsPadding)
             }
             .onAppear {
-                self.timer.start(elapsedTime: self.continuingGame ? StorageManager.getContinueGameTime() : 0)
+                self.timer.start(elapsedTime: self.continuingGame ? StorageManager.getContinueGameTime() : self.timer.getElapsedTime())
             }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 handleScenePhaseChange(newPhase: newPhase)
@@ -304,6 +301,19 @@ struct GameView: View {
     }
 }
 
+struct TimerText: View {
+    let elapsedTime: Int
+    let timerFont: Font
+    let timerFontColor: Color
+    
+    var body: some View {
+        Text(TimeHelper.getTimeString(seconds: elapsedTime))
+            .bold()
+            .font(timerFont)
+            .foregroundStyle(timerFontColor)
+    }
+}
+
 /// tlačítko pro návrat do Menu
 struct MenuButton: View {
     let buttonWidth: CGFloat
@@ -369,17 +379,13 @@ struct SudokuCellView: View {
     /// je uživatelem určená hodnota správně?
     let correct: Bool
     
-    /// barevné schéma
-    let colorScheme: ColorScheme
+    /// správce barevného módu
+    let colorModeManager: ColorModeManager
     
     var body: some View {
         let backgroundColor: Color = self.determineCellColor()  // barva pozadí buňky
         
-        // hodnota je zvýrazněna pokud má stejné číslo jako uživatelem právě vybraná buňka
-        let valueColor: Color = (self.value == self.selectedNumber) ? COLOR_SAME_NUMBER : self.colorScheme == .dark ? .white : .black
-        
-        // hodnota je červeně pokud je nesprávná
-        let finalValueColor: Color = self.correct ? valueColor : .red
+        let valueColor: Color = self.determineValueColor()
         
         let finalBorderColor: Color = self.highlighted ? COLOR_HIGHLIGHT : self.borderColor
         let finalBorderWidth: CGFloat = self.highlighted ? self.borderWidth * 4 : borderWidth   // barva hranic buňky
@@ -388,7 +394,7 @@ struct SudokuCellView: View {
             if value != 0 {
                 // buňka má danou hodnotu
                 Text("\(value)")
-                    .foregroundStyle(finalValueColor)
+                    .foregroundStyle(valueColor)
             }
             else {
                 // buňka nemá hodnotu -> zobrazení 3x3 mřížky pro kandidáty
@@ -400,7 +406,7 @@ struct SudokuCellView: View {
                                 let numberOpacity: CGFloat = candidates.contains(number) ? 1.0 : 0.0
                                 
                                 // kandidát je zvýrazněn pokud má stejné číslo jako uživatelem právě vybraná buňka
-                                let fontColor: Color = (number == self.selectedNumber) ? COLOR_SAME_NUMBER : self.colorScheme == .dark ? .white : .black
+                                let fontColor: Color = self.determineCandidateFontColor(number: number)
                                 
                                 // kandidát zobrazen jen pokud je v množině kandidátů
                                 Text("\(number)")
@@ -420,17 +426,31 @@ struct SudokuCellView: View {
         .background(backgroundColor)
     }
     
+    private func determineCandidateFontColor(number: Int) -> Color {
+        return (number == self.selectedNumber) ? COLOR_SAME_NUMBER : self.colorModeManager.isDarkMode ? .white : .black
+    }
+    
+    private func determineValueColor() -> Color {
+        // hodnota je zvýrazněna pokud má stejné číslo jako uživatelem právě vybraná buňka
+        let valueColor: Color = (self.value == self.selectedNumber) ? COLOR_SAME_NUMBER : self.colorModeManager.isDarkMode ? .white : .black
+        
+        // hodnota je červeně pokud je špatně
+        let finalValueColor: Color = self.correct ? valueColor : .red
+        
+        return finalValueColor
+    }
+    
     /// Určí barvu buňky podle příslušnosti k boxu a uživatelem vybrané buňky.
     /// - Returns: barva buňky
-    func determineCellColor() -> Color {
-        let color1: Color = (self.colorScheme == .dark) ? BOX_COLOR_PURPLE_DARK.opacity(0.7) : BOX_COLOR_PURPLE_LIGHT.opacity(0.5)
-        let color2: Color = (self.colorScheme == .dark) ? BOX_COLOR_PINK_DARK.opacity(0.7) : BOX_COLOR_PINK_LIGHT.opacity(0.5)
+    private func determineCellColor() -> Color {
+        let color1: Color = colorModeManager.isDarkMode ? BOX_COLOR_PURPLE_DARK.opacity(0.7) : BOX_COLOR_PURPLE_LIGHT.opacity(0.5)
+        let color2: Color = colorModeManager.isDarkMode ? BOX_COLOR_PINK_DARK.opacity(0.7) : BOX_COLOR_PINK_LIGHT.opacity(0.5)
         
         // barva buňky vybrané uživatelem
-        let selectedColor: Color = (self.colorScheme == .dark) ? .black : .white
+        let selectedColor: Color = colorModeManager.isDarkMode ? .black : .white
         
         // barva pro sloupec, řádek a sloupec příslušícím vybrané buňce
-        let neighborColor: Color = (self.colorScheme == .dark) ? BOX_COLOR_GREEN_DARK.opacity(0.75) : BOX_COLOR_GREEN_LIGHT.opacity(0.75)
+        let neighborColor: Color = colorModeManager.isDarkMode ? BOX_COLOR_GREEN_DARK.opacity(0.75) : BOX_COLOR_GREEN_LIGHT.opacity(0.75)
         
         // pokud je buňka vybraná uživatelem
         if (self.row == self.selectedRow && self.column == self.selectedColumn) {
@@ -511,13 +531,14 @@ struct ToolsView: View {
     /// čas aktuální hry
     let elapsedTime: Int
     
-    /// barevné schéma
-    let colorScheme: ColorScheme
+    /// správce barevného módu
+    let colorModeManager: ColorModeManager
+    
     /// orientace zařízení
     let orientation: UIDeviceOrientation
     
     var body: some View {
-        let basicFontColor: Color = (self.colorScheme == .dark) ? .white : .black
+        let basicFontColor: Color = self.colorModeManager.isDarkMode ? .white : .black
         let finalFontColor: Color = (self.board.isPreFilled(row: self.selectedRow, column: self.selectedColumn)) ? .gray : basicFontColor
         
         // pro předvyplněné buňky není nástroj vymazat viditelný

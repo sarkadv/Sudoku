@@ -2,9 +2,11 @@ import SwiftUI
 
 /// Třída poskytuje perzistentní uložení dat mezi vypnutím a zapnutím aplikace.
 class StorageManager {
-    private static let INT_INITIALIZER: Int = -1
+    private static let INT_INITIALIZER: Int = Int.max
     private static let STRING_INITIALIZER: String = ""
     private static let DIFFICULTY_INITIALIZER: Difficulty = .easy
+    private static let COLOR_MODE_INITIALIZER: ColorMode = .auto
+    private static let LANGUAGE_INITIALIZER: Language = .english
     
     // nejnižší čas v sekundách pro každou obtížnost
     @AppStorage("highscoreDemo") private static var highscoreDemo: Int = INT_INITIALIZER
@@ -21,6 +23,25 @@ class StorageManager {
     @AppStorage("continueGameDifficulty") private static var continueGameDifficulty: Difficulty = DIFFICULTY_INITIALIZER    // obtížnost
     @AppStorage("continueGameTime") private static var continueGameTime: Int = INT_INITIALIZER  // uplynulý čas v sekundách
     
+    // uživatelské nastavení
+    @AppStorage("colorMode") private static var colorMode: ColorMode = COLOR_MODE_INITIALIZER
+    @AppStorage("language") private static var language: Language = LANGUAGE_INITIALIZER
+    
+    public static func setColorMode(mode: ColorMode) -> Void {
+        StorageManager.colorMode = mode
+    }
+    
+    public static func getColorMode() -> ColorMode {
+        return StorageManager.colorMode
+    }
+    
+    public static func setLanguage(language: Language) -> Void {
+        StorageManager.language = language
+    }
+    
+    public static func getLanguage() -> Language {
+        return StorageManager.language
+    }
     
     /// Uloží do perzistentního úložiště nedohranou hru.
     /// - Parameters:
@@ -30,7 +51,6 @@ class StorageManager {
     ///   - candidates: kandidáti všech buněk
     ///   - difficulty: obtížnost
     ///   - timeSeconds: uplynulý čas v sekundách
-    /// - Returns: Void
     public static func addStoredGame(gameStarterValues: [[Int]], gameValue: [[Int]], gameSolution: [[Int]], candidates: [[[Int]]], difficulty: Difficulty, timeSeconds: Int)
     -> Void {
         StorageManager.continueGameStored = true
@@ -45,7 +65,6 @@ class StorageManager {
     }
     
     /// Odstraní z úložiště nedohranou hru, pokud v úložišti je.
-    /// - Returns: Void
     public static func removeStoredGame() -> Void {
         if (StorageManager.continueGameStored) {
             StorageManager.continueGameStored = false
@@ -116,7 +135,6 @@ class StorageManager {
     /// - Parameters:
     ///   - difficulty: obtížnost hry
     ///   - seconds: čas řešení sudoku
-    /// - Returns: Void
     public static func setHighscore(difficulty: Difficulty, seconds: Int) -> Void {
         switch difficulty {
             case .demo:
