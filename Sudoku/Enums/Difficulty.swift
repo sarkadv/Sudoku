@@ -6,7 +6,7 @@ enum Difficulty: String, CaseIterable {
     case demo
     
     public func toString() -> String {
-        return rawValue.prefix(1).uppercased() + rawValue.dropFirst()
+        return rawValue
     }
     
     public static func fromString(difficultyString: String) -> Difficulty? {

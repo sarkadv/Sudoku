@@ -27,6 +27,10 @@ class ColorModeManager: ObservableObject {
         self.isDarkMode = getColorMode() == .dark
     }
     
+    public func getStoredColorMode() -> ColorMode {
+        return StorageManager.getColorMode()
+    }
+    
     /// Podle nastavení aplikace a zařízení určí výsledný barevný mód aplikace.
     /// - Returns: barevný mód aplikace
     private func getColorMode() -> ColorMode {

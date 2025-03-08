@@ -5,7 +5,7 @@ enum ColorMode: String, CaseIterable {
     case light
     
     public func toString() -> String {
-        return rawValue.prefix(1).uppercased() + rawValue.dropFirst()
+        return rawValue
     }
 
 }

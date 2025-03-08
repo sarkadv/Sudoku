@@ -30,23 +30,26 @@ struct WinView: View {
         let bestTimeString = TimeHelper.getTimeString(seconds: StorageManager.getHighscore(difficulty: self.difficulty))
         
         VStack {
-            Text("You won! 👑")
+            Text(LocalizedStringKey("you_won"))
                 .font(.headline)
                 .foregroundStyle(fontColor)
                 .padding(padding)
             
-            Text("Time: \(currentTimeString)")
+            (Text(LocalizedStringKey("time")) + Text(": \(currentTimeString)"))
                 .foregroundStyle(fontColor)
                 .padding(.bottom, padding / 2)
             
-            Text("Best time for difficulty \(self.difficulty): \(bestTimeString)")
+            (Text(LocalizedStringKey("best_time_difficulty"))
+             + Text(" ")
+             + Text(LocalizedStringKey(self.difficulty.toString()))
+             + Text(": \(bestTimeString)"))
                 .foregroundStyle(fontColor)
                 .padding(.bottom, padding)
             
             Button(action: {
                 self.state = .menu
             }) {
-                Text("Menu")
+                Text(LocalizedStringKey("menu"))
                     .font(.headline)
                     .padding()
                     .frame(width: buttonWidth, height: buttonHeight)

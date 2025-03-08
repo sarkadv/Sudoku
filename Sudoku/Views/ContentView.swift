@@ -18,6 +18,9 @@ struct ContentView: View {
     /// pro nastavení colorModeManager
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     
+    /// správce jazyka aplikace
+    @StateObject var languageManager = LanguageManager()
+    
     /// orientace zařízení
     @State private var orientation: UIDeviceOrientation = UIDevice.current.orientation
     
@@ -37,25 +40,31 @@ struct ContentView: View {
                     MenuView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, orientation: $orientation)
                         .environmentObject(board)
                         .environmentObject(colorModeManager)
+                        .environment(\.locale, languageManager.locale)
                 }
                 
                 else if (state == .loading) {
                     LoadingView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame)
                         .environmentObject(board)
                         .environmentObject(colorModeManager)
+                        .environment(\.locale, languageManager.locale)
                 }
                 else if (state == .game) {
                     GameView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, finalScoreSeconds: $finalScoreSeconds, orientation: $orientation)
                         .environmentObject(board)
                         .environmentObject(colorModeManager)
+                        .environment(\.locale, languageManager.locale)
                 }
                 else if (state == .win) {
                     WinView(state: $state, difficulty: $difficulty, finalScoreSeconds: $finalScoreSeconds)
                         .environmentObject(colorModeManager)
+                        .environment(\.locale, languageManager.locale)
                 }
                 else if (state == .settings) {
                     SettingsView(state: $state)
                         .environmentObject(colorModeManager)
+                        .environment(\.locale, languageManager.locale)
+                        .environmentObject(languageManager)
                 }
             }
             .onAppear {

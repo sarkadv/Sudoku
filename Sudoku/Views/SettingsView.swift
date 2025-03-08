@@ -7,6 +7,9 @@ struct SettingsView: View {
     
     /// správce barevného módu
     @EnvironmentObject var colorModeManager: ColorModeManager
+    
+    /// správce jazyka aplikace
+    @EnvironmentObject var languageManager: LanguageManager
 
     /// velikost displeje
     @Environment(\.horizontalSizeClass) var sizeClass: UserInterfaceSizeClass?
@@ -37,7 +40,7 @@ struct SettingsView: View {
             Button(action: {
                 self.state = .menu
             }) {
-                Text("Menu")
+                Text(LocalizedStringKey("menu"))
                     .font(.headline)
                     .padding()
                     .frame(width: buttonWidth, height: buttonHeight)
@@ -48,7 +51,7 @@ struct SettingsView: View {
             .padding(buttonPadding)
             
             VStack {
-                Text("Color Mode:")
+                (Text(LocalizedStringKey("color_mode")) + Text(":"))
                     .font(.headline)
                     .foregroundStyle(fontColor)
 
@@ -59,7 +62,7 @@ struct SettingsView: View {
                         Image(systemName: circleImageName)
                             .foregroundStyle(.gray)
                         
-                        Text(mode.toString())
+                        Text(LocalizedStringKey(mode.toString()))
                             .foregroundStyle(fontColor)
                     }
                     .onTapGesture {
@@ -71,7 +74,7 @@ struct SettingsView: View {
             .padding()
             
             VStack {
-                Text("Language:")
+                (Text(LocalizedStringKey("language")) + Text(":"))
                     .font(.headline)
                     .foregroundStyle(fontColor)
 
@@ -82,7 +85,7 @@ struct SettingsView: View {
                         Image(systemName: circleImageName)
                             .foregroundStyle(.gray)
                         
-                        Text(language.toString())
+                        Text(LocalizedStringKey(language.toString()))
                             .foregroundStyle(fontColor)
                     }
                     .onTapGesture {
@@ -101,6 +104,8 @@ struct SettingsView: View {
     }
     
     private func setSelectedLanguage(language: Language) -> Void {
+        self.selectedLanguage = language
+        self.languageManager.setLocale(language: language)
     }
 }
 

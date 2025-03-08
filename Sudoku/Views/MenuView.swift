@@ -25,7 +25,7 @@ struct MenuView: View {
         let spacing: CGFloat = isPhone ? 20.0 : 30.0    // velikost mezery mezi tlačítky
         let imageSize: CGFloat = isPhone ? 200.0 : 400.0    // velikost úvodního obrázku
         let imageName: String = self.colorModeManager.isDarkMode ? "sudoku_dark" : "sudoku_light" // úvodní obrázek
-        let buttonWidth: CGFloat = isPhone ? 200.0 : 350.0  // šířka tlačítka
+        let buttonWidth: CGFloat = isPhone ? 250.0 : 350.0  // šířka tlačítka
         let buttonHeight: CGFloat = isPhone ? 35.0 : 60.0   // výška tlačítka
         let titleFontSize: CGFloat = isPhone ? 30.0 : 50.0  // velikost nadpisu
         let fontColor: Color = self.colorModeManager.isDarkMode ? .white : .black   // barva fontu
@@ -119,7 +119,7 @@ struct TitleView: View {
     let fontColor: Color
     
     var body: some View {
-        Text("sudoku")
+        Text(LocalizedStringKey("sudoku"))
             .padding()
             .font(.system(size: fontSize))
             .foregroundStyle(fontColor)
@@ -156,7 +156,10 @@ struct ButtonsView: View {
                 self.setState(.loading)
 
             }) {
-                Text("Continue (\(StorageManager.getContinueGameDifficulty().toString()))")
+                (Text(LocalizedStringKey("continue"))
+                 + Text(" (")
+                 + Text(LocalizedStringKey(StorageManager.getContinueGameDifficulty().toString()))
+                 + Text(")"))
                     .font(.headline)
                     .padding()
                     .frame(width: buttonWidth, height: buttonHeight)
@@ -171,7 +174,7 @@ struct ButtonsView: View {
             self.setDifficulty(.easy)
             self.setState(.loading)
         }) {
-            Text("Easy")
+            Text(LocalizedStringKey("easy"))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)
@@ -186,7 +189,7 @@ struct ButtonsView: View {
             self.setDifficulty(.medium)
             self.setState(.loading)
         }) {
-            Text("Medium")
+            Text(LocalizedStringKey("medium"))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)
@@ -201,7 +204,7 @@ struct ButtonsView: View {
             self.setDifficulty(.hard)
             self.setState(.loading)
         }) {
-            Text("Hard")
+            Text(LocalizedStringKey("hard"))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)
@@ -216,7 +219,7 @@ struct ButtonsView: View {
             self.setDifficulty(.demo)
             self.setState(.loading)
         }) {
-            Text("Demo")
+            Text(LocalizedStringKey("demo"))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)
@@ -229,7 +232,7 @@ struct ButtonsView: View {
         Button(action: {
             self.setState(.settings)
         }) {
-            Text("Settings")
+            Text(LocalizedStringKey("settings"))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)

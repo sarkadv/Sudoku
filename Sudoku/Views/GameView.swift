@@ -332,7 +332,7 @@ struct MenuButton: View {
             self.saveGame()
             self.setState(.menu)
         }) {
-            Text("Menu")
+            Text(LocalizedStringKey("menu"))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)

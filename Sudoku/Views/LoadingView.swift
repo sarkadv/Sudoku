@@ -21,7 +21,7 @@ struct LoadingView: View {
         let fontColor: Color = self.colorModeManager.isDarkMode ? .white : .black  // barva fontu
         
         VStack {
-            Text("Loading...")
+            Text(LocalizedStringKey("loading"))
                 .font(.headline)
                 .foregroundStyle(fontColor)
                 .padding()
