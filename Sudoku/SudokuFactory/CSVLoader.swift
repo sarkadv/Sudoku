@@ -17,8 +17,8 @@ class CSVLoader
     
     /// Načte a vrátí všechna sudoku z CSV souboru.
     /// - Returns: všechna sudoku z CSV souboru
-    public func loadFromCSV() -> [FileResponse] {
-        var sudokus: [FileResponse] = []
+    public func loadFromCSV() -> [CharSudoku] {
+        var sudokus: [CharSudoku] = []
 
         let url: URL = Bundle.main.url(forResource: self.resourceName, withExtension: self.resourceExtension)!
         
@@ -34,7 +34,7 @@ class CSVLoader
                     continue
                 }
                 
-                let sudoku: FileResponse = processRow(row: row)
+                let sudoku: CharSudoku = processRow(row: row)
                 sudokus.append(sudoku)
             }
         }
@@ -48,7 +48,7 @@ class CSVLoader
     /// Zpracuje jeden řádek z CSV souboru a vrátí objekt obsahující informace o sudoku.
     /// - Parameter row: řádek z CSV souboru
     /// - Returns: objekt FileResponse s informacemi o sudoku
-    private func processRow(row: String) -> FileResponse {
+    private func processRow(row: String) -> CharSudoku {
         // rozdělení řádky na části
         let columns = row.components(separatedBy: self.columnSeparator)
         
@@ -57,10 +57,10 @@ class CSVLoader
         let solutionString = columns[2]
         
         // 81 čísel je převedeno na 9x9 pole
-        let valueGrid = StringHelper.stringTo2DArray(gridString: valueString)
-        let solutionGrid = StringHelper.stringTo2DArray(gridString: solutionString)
+        let valueGrid = StringHelper.stringTo2DCharArray(gridString: valueString)
+        let solutionGrid = StringHelper.stringTo2DCharArray(gridString: solutionString)
         
-        return FileResponse(value: valueGrid, solution: solutionGrid, difficulty: difficulty)
+        return CharSudoku(value: valueGrid, solution: solutionGrid, difficulty: difficulty)
     }
 }
 

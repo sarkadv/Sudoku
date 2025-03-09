@@ -78,19 +78,19 @@ class StorageManager {
     }
     
     public static func getContinueGameStarterValues() -> [[Int]] {
-        return StringHelper.stringTo2DArray(gridString: StorageManager.continueGameStarterValues)
+        return StringHelper.stringTo2DIntArray(gridString: StorageManager.continueGameStarterValues)
     }
     
     public static func getContinueGameValue() -> [[Int]] {
-        return StringHelper.stringTo2DArray(gridString: StorageManager.continueGameValue)
+        return StringHelper.stringTo2DIntArray(gridString: StorageManager.continueGameValue)
     }
     
     public static func getContinueGameSolution() -> [[Int]] {
-        return StringHelper.stringTo2DArray(gridString: StorageManager.continueGameSolution)
+        return StringHelper.stringTo2DIntArray(gridString: StorageManager.continueGameSolution)
     }
     
     public static func getContinueGameCandidates() -> [[[Int]]] {
-        return StringHelper.stringTo3DArray(candidatesString: StorageManager.continueGameCandidates)
+        return StringHelper.stringTo3DIntArray(candidatesString: StorageManager.continueGameCandidates)
     }
     
     public static func isContinueGameStored() -> Bool {

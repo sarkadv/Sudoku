@@ -27,12 +27,8 @@ class Board: ObservableObject
     
     /// Vygeneruje sudoku mřížku připravenou ke hře.
     /// - Parameter difficulty: obtížnost vygenerované mřížky
-    public func generate(difficulty: Difficulty) async -> Void {
-        let result: [[Cell]]
-        // vytvoření sudoku ke hře
-        await result = self.fetcher.fetchPuzzle(difficulty: difficulty)
-        
-        self.cells = result
+    public func newGame(difficulty: Difficulty) -> Void {
+        self.cells = self.fetcher.fetchNewGame(difficulty: difficulty)
     }
     
     /// Vezme z perzistentního úložiště rozehranou uloženou hru.

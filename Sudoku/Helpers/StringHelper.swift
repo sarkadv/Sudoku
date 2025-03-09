@@ -6,7 +6,7 @@ class StringHelper {
     /// Řetězec skládající se z 81 čísel převede na 9x9 pole.
     /// - Parameter gridString: řetězec 81 čísel
     /// - Returns: 9x9 pole čísel
-    public static func stringTo2DArray(gridString: String) -> [[Int]] {
+    public static func stringTo2DIntArray(gridString: String) -> [[Int]] {
         var grid: [[Int]] = []
         var row: [Int] = []
         
@@ -28,6 +28,36 @@ class StringHelper {
             if row.count == 9
             {
                 // bylo přidáno 9 čísel, řádek je hotový
+                grid.append(row)
+                
+                // reset řádku
+                row = []
+            }
+        }
+        
+        return grid
+    }
+    
+    /// Řetězec skládající se z 81 znaků převede na 9x9 pole.
+    /// - Parameter gridString: řetězec 81 znaků
+    /// - Returns: 9x9 pole znaků
+    public static func stringTo2DCharArray(gridString: String) -> [[Character]] {
+        var grid: [[Character]] = []
+        var row: [Character] = []
+        
+        for i in 0..<gridString.count
+        {
+            // index do řetězce
+            let index: String.Index = gridString.index(gridString.startIndex, offsetBy: i)
+            
+            // znak na daném indexu
+            let char: Character = gridString[index]
+            
+            row.append(char)
+            
+            if row.count == 9
+            {
+                // bylo přidáno 9 znaků, řádek je hotový
                 grid.append(row)
                 
                 // reset řádku
@@ -74,7 +104,7 @@ class StringHelper {
     /// Řetězec skládající se z max 9x9x9 čísel převede na 9x9x9 pole kandidátů.
     /// - Parameter candidatesString: řetězec max 9x9x9 čísel
     /// - Returns: 9x9x9 pole kandidátů
-    public static func stringTo3DArray(candidatesString: String) -> [[[Int]]] {
+    public static func stringTo3DIntArray(candidatesString: String) -> [[[Int]]] {
         var result: [[[Int]]] = []
         var row: [[Int]] = []
         var cellCandidates: [Int] = []

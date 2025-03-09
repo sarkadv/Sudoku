@@ -51,6 +51,8 @@ struct MenuView: View {
                     ButtonsView(setState: self.setState,
                                 setDifficulty: self.setDifficulty,
                                 setContinuingGame: self.setContinuingGame,
+                                newGame: self.newGame,
+                                continueGame: self.continueGame,
                                 buttonWidth: buttonWidth,
                                 buttonHeight: buttonHeight,
                                 buttonContinueColor: buttonContinueColor,
@@ -72,6 +74,8 @@ struct MenuView: View {
                 ButtonsView(setState: self.setState,
                             setDifficulty: self.setDifficulty,
                             setContinuingGame: self.setContinuingGame,
+                            newGame: self.newGame,
+                            continueGame: self.continueGame,
                             buttonWidth: buttonWidth,
                             buttonHeight: buttonHeight,
                             buttonContinueColor: buttonContinueColor,
@@ -82,6 +86,18 @@ struct MenuView: View {
                             buttonSettingsColor: buttonSettingsColor)
             }
         }
+    }
+    
+    /// Vygenerování nové hratelné sudoku mřížky
+    private func newGame() -> Void {
+        self.board.newGame(difficulty: self.difficulty)
+        self.state = .game
+    }
+    
+    /// Nastavení mřížky pro pokračování v minulé hře
+    private func continueGame() -> Void {
+        self.board.continueGame()
+        self.state = .game
     }
     
     private func setState(state: ViewState) -> Void {
@@ -135,6 +151,11 @@ struct ButtonsView: View {
     /// callback pro změnu hodnoty pokračování v minulé nedohrané hře
     let setContinuingGame: (Bool) -> Void
     
+    /// callback pro vyvolání nové hry
+    let newGame: () -> Void
+    /// callback pro pokračování ve hře
+    let continueGame: () -> Void
+    
     /// šířka tlačítka
     let buttonWidth: CGFloat
     /// výška tlačítka
@@ -153,7 +174,7 @@ struct ButtonsView: View {
             Button(action: {
                 self.setContinuingGame(true)
                 self.setDifficulty(StorageManager.getContinueGameDifficulty())
-                self.setState(.loading)
+                self.continueGame()
 
             }) {
                 (Text(LocalizedStringKey("continue"))
@@ -172,7 +193,7 @@ struct ButtonsView: View {
         Button(action: {
             self.setContinuingGame(false)
             self.setDifficulty(.easy)
-            self.setState(.loading)
+            self.newGame()
         }) {
             Text(LocalizedStringKey("easy"))
                 .font(.headline)
@@ -187,7 +208,7 @@ struct ButtonsView: View {
         Button(action: {
             self.setContinuingGame(false)
             self.setDifficulty(.medium)
-            self.setState(.loading)
+            self.newGame()
         }) {
             Text(LocalizedStringKey("medium"))
                 .font(.headline)
@@ -202,7 +223,7 @@ struct ButtonsView: View {
         Button(action: {
             self.setContinuingGame(false)
             self.setDifficulty(.hard)
-            self.setState(.loading)
+            self.newGame()
         }) {
             Text(LocalizedStringKey("hard"))
                 .font(.headline)
@@ -217,7 +238,7 @@ struct ButtonsView: View {
         Button(action: {
             self.setContinuingGame(false)
             self.setDifficulty(.demo)
-            self.setState(.loading)
+            self.newGame()
         }) {
             Text(LocalizedStringKey("demo"))
                 .font(.headline)

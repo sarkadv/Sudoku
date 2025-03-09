@@ -553,7 +553,7 @@ struct ToolsView: View {
                 VStack(spacing: toolsPadding/2) {
                     HStack(spacing: toolsPadding/2) {
                         // nástroj tužka pro kandidáty
-                        Text(STRING_PENCIL_TOOL)
+                        Text(LocalizedStringKey("pencil_tool"))
                             .font(.system(size: fontSize))
                             .background(pencilToolBackground)
                             .cornerRadius(self.cornerRadius)
@@ -563,7 +563,7 @@ struct ToolsView: View {
                             }
                         
                         // nástroj zvýrazňovač
-                        Text(STRING_HIGHLIGHTER_TOOL)
+                        Text(LocalizedStringKey("highlighter_tool"))
                             .font(.system(size: fontSize))
                             .onTapGesture {
                                 // zvýraznění / odstranění zvýraznění aktuálně vybrané buňky
@@ -572,7 +572,7 @@ struct ToolsView: View {
                     }
                     HStack(spacing: toolsPadding/2) {
                         // nástroj odstranění zvýrazňovače
-                        Text(STRING_HIGHLIGHTER_REMOVE_TOOL)
+                        Text(LocalizedStringKey("highlighter_remove_tool"))
                             .font(.system(size: fontSize))
                             .onTapGesture {
                                 // odstraní zvýraznění ze všech buněk
@@ -580,7 +580,7 @@ struct ToolsView: View {
                             }
                         
                         // nástroj vymazat
-                        Text(STRING_REMOVE_TOOL)
+                        Text(LocalizedStringKey("remove_tool"))
                             .font(.system(size: fontSize))
                             .opacity(removeToolVisibility)  // nastavení viditelnosti
                             .onTapGesture {
@@ -595,7 +595,7 @@ struct ToolsView: View {
             else {
                 HStack(spacing: toolsPadding) {
                     // nástroj tužka pro kandidáty
-                    Text(STRING_PENCIL_TOOL)
+                    Text(LocalizedStringKey("pencil_tool"))
                         .font(.system(size: fontSize))
                         .background(pencilToolBackground)
                         .cornerRadius(self.cornerRadius)
@@ -605,7 +605,7 @@ struct ToolsView: View {
                         }
                     
                     // nástroj zvýrazňovač
-                    Text(STRING_HIGHLIGHTER_TOOL)
+                    Text(LocalizedStringKey("highlighter_tool"))
                         .font(.system(size: fontSize))
                         .onTapGesture {
                             // zvýraznění / odstranění zvýraznění aktuálně vybrané buňky
@@ -613,7 +613,7 @@ struct ToolsView: View {
                         }
                     
                     // nástroj odstranění zvýrazňovače
-                    Text(STRING_HIGHLIGHTER_REMOVE_TOOL)
+                    Text(LocalizedStringKey("highlighter_remove_tool"))
                         .font(.system(size: fontSize))
                         .onTapGesture {
                             // odstraní zvýraznění ze všech buněk
@@ -621,7 +621,7 @@ struct ToolsView: View {
                         }
                     
                     // nástroj vymazat
-                    Text(STRING_REMOVE_TOOL)
+                    Text(LocalizedStringKey("remove_tool"))
                         .font(.system(size: fontSize))
                         .opacity(removeToolVisibility)  // nastavení viditelnosti
                         .onTapGesture {

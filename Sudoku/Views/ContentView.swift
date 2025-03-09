@@ -42,13 +42,6 @@ struct ContentView: View {
                         .environmentObject(colorModeManager)
                         .environment(\.locale, languageManager.locale)
                 }
-                
-                else if (state == .loading) {
-                    LoadingView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame)
-                        .environmentObject(board)
-                        .environmentObject(colorModeManager)
-                        .environment(\.locale, languageManager.locale)
-                }
                 else if (state == .game) {
                     GameView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, finalScoreSeconds: $finalScoreSeconds, orientation: $orientation)
                         .environmentObject(board)

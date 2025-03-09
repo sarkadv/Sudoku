@@ -3,87 +3,8 @@ import Foundation
 /// vytvoří sudoku mřížku připravenou pro hru
 class SudokuFetcher
 {
-    /// URL adresa použitého API
-    private let API_URL: String = "https://sudoku-api.vercel.app/api/dosuku"
-    
-    /// limit API volání pro získání jednoho sudoku
-    private let API_CALL_LIMIT: Int = 5
-    
-    /// timeout pro API volání v sekundách
-    private let TIMEOUT_S: Double = 1
-    
-    /// čas uspání mezi jednotlivými API voláními v ms
-    private let SLEEP_MS: UInt32 = 200_000
-    
-    /// instance s nacachovanými sudoku
-    private let cache: SudokuCache
-    
-    init() {
-        self.cache = SudokuCache()
-    }
-    
-    /// Vrátí sudoku dané obtížnosti.
-    /// Nejdříve se pokusí sudoku získat z cache, pokud zde žádné vhodné není,
-    /// pokusí se získat sudoku dané obtížnosti pomocí API.
-    /// Po vyčerpání limitu na počet API volání je sudoku získáno z textového souboru.
-    /// - Parameter difficulty: požadovaná obtížnost
-    /// - Returns: 2D mřížka Cell instancí
-    public func fetchPuzzle(difficulty: Difficulty) async -> [[Cell]] {
-        // demo je pouze ze souboru
-        if (difficulty == .demo) {
-            return self.fetchFromFile(difficulty: .demo)
-        }
-        
-        // zkusíme, zda sudoku dané obtížnosti není v cache
-        let cachedResponse: Response? = self.cache.popFromApiCache(difficulty: difficulty)
-        
-        if (cachedResponse != nil) {
-            return self.mapResponseToCells(response: cachedResponse!)
-        }
-        
-        // získání URL objektu obsahující adresu API
-        let url = URL(string: API_URL)
-        
-        // vytvoření session
-        let session = self.createSession()
-        
-        do {
-            // počet API volání
-            var tries: Int = 0
-            
-            // dotazy na API, dokud sudoku není dané obtížnosti nebo nevyprší limit dotazů
-            while (tries < self.API_CALL_LIMIT) {
-                // asynchronní získání dat pomocí API
-                let (data, _) = try await session.data(from: url!)
-                
-                // odpověď ve formátu JSON je dekódována do struktury ApiResponse
-                let decoder = JSONDecoder()
-                let response = try decoder.decode(ApiResponse.self, from: data)
-                
-                // sudoku je správné obtížnosti
-                if (response.getDifficulty() == difficulty) {
-                    // odpověď je namapována na formát mřížky aplikace
-                    return self.mapResponseToCells(response: response)
-                }
-                else {
-                    // přidání sudoku s nesprávnou obtížností do cache
-                    self.cache.addToApiCache(response: response)
-                    
-                    // uspání, aby nebyly dotazy na API moc rychle za sebou
-                    usleep(self.SLEEP_MS)
-                    tries += 1
-                }
-            }
-            
-            // vypršel limit na počet API volání
-            return self.fetchFromFile(difficulty: difficulty)
-        }
-        catch {
-            // došlo k chybě nebo timeoutu při API volání
-            return self.fetchFromFile(difficulty: difficulty)
-        }
-        
-    }
+    /// instance s nacachovanými sudoku ze souboru
+    private let cache: SudokuCache = SudokuCache()
     
     /// - Returns: rozehrané sudoku z perzistentního úložiště
     public func fetchContinueGame() -> [[Cell]] {
@@ -116,21 +37,116 @@ class SudokuFetcher
         
         return cells
     }
-    
-    /// Vrátí náhodné sudoku dané obtížnosti z textového souboru.
+
+    /// Úpravou sudoku ze souboru vytvoří nové hratelné sudoku.
     /// - Parameter difficulty: požadovaná obtížnost
-    /// - Returns: sudoku ze souboru
-    private func fetchFromFile(difficulty: Difficulty) -> [[Cell]] {
-        let response: Response = self.cache.getRandomFromFileCache(difficulty: difficulty)
-        return self.mapResponseToCells(response: response)
+    /// - Returns: hratelné sudoku
+    public func fetchNewGame(difficulty: Difficulty) -> [[Cell]] {
+        // sudoku se znaky místo čísel
+        let charSudoku: CharSudoku = self.cache.getRandomFromFileCache(difficulty: difficulty)
+        
+        // náhodné mapování znaků na čísla
+        let mapping: [Character : Int] = self.getRandomMapping()
+        
+        // očíslované sudoku podle mapování
+        var numberedSudoku: NumberedSudoku = NumberedSudoku(charSudoku: charSudoku, mapping: mapping)
+        
+        // náhodná rotace o 90, 180 nebo 270 stupňů
+        numberedSudoku = self.randomlyRotate(numberedSudoku: numberedSudoku)
+        
+        // nic nebo vertikální překlopení
+        numberedSudoku = self.randomVerticalFlip(numberedSudoku: numberedSudoku)
+        
+        // nic nebo horizontální překlopení
+        numberedSudoku = self.randomHorizontalFlip(numberedSudoku: numberedSudoku)
+        
+        return self.mapNumberedSudokuToCells(numberedSudoku: numberedSudoku)
     }
     
-    /// Z ApiResponse objektu vytvoří 2D mřížku Cell instancí.
-    /// - Parameter response: odpověď od API
-    /// - Returns: 2D mřížka Cell instancí
-    private func mapResponseToCells(response: Response) -> [[Cell]] {
-        let valueGrid: [[Int]] = response.getValueGrid()
-        let solutionGrid: [[Int]] = response.getSolutionGrid()
+    private func getRandomMapping() -> [Character : Int] {
+        var allChars: [Character] = ["a", "b", "c", "d", "e", "f", "g", "h", "i"]
+        var allNumbers: [Int] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        
+        var mapping: [Character : Int] = ["0" : 0]
+        
+        while (allChars.count > 0) {
+            let char: Character = allChars.randomElement()!
+            let charIndex: Int = allChars.firstIndex(of: char)!
+            allChars.remove(at: charIndex)
+            
+            let number: Int = allNumbers.randomElement()!
+            let numberIndex: Int = allNumbers.firstIndex(of: number)!
+            allNumbers.remove(at: numberIndex)
+            
+            mapping[char] = number
+        }
+        
+        return mapping
+    }
+    
+    /// Náhodná rotace mřížky o 90, 180 nebo 270 stupňů.
+    /// - Parameter numberedSudoku: očíslované sudoku
+    /// - Returns: rotované sudoku
+    private func randomlyRotate(numberedSudoku: NumberedSudoku) -> NumberedSudoku {
+        let rotations: Int = Int.random(in: 0...3)
+        var rotatedSudoku: NumberedSudoku = numberedSudoku
+        
+        for _ in 0..<rotations {
+            rotatedSudoku = rotate90Degrees(numberedSudoku: rotatedSudoku)
+        }
+        
+        return rotatedSudoku
+    }
+    
+    /// Rotace mřížky o 90 stupňů.
+    /// - Parameter numberedSudoku: očíslované sudoku
+    /// - Returns: rotované sudoku
+    private func rotate90Degrees(numberedSudoku: NumberedSudoku) -> NumberedSudoku {
+        var rotatedSudoku: NumberedSudoku = numberedSudoku
+        
+        rotatedSudoku.setValueGrid(valueGrid: MatrixHelper.rotate90DegreesClockwise(matrix: numberedSudoku.getValueGrid()))
+        rotatedSudoku.setSolutionGrid(solutionGrid: MatrixHelper.rotate90DegreesClockwise(matrix: numberedSudoku.getSolutionGrid()))
+        
+        return rotatedSudoku
+    }
+    
+    /// Metoda náhodně sudoku vertikálně překlopí nebo ne.
+    /// - Parameter numberedSudoku: očíslované sudoku
+    /// - Returns: překlopené nebo stejné sudoku
+    private func randomVerticalFlip(numberedSudoku: NumberedSudoku) -> NumberedSudoku {
+        var flippedSudoku: NumberedSudoku = numberedSudoku
+        let flip: Bool = Bool.random()
+        
+        if (flip) {
+            flippedSudoku.setValueGrid(valueGrid: MatrixHelper.verticalFlip(matrix: numberedSudoku.getValueGrid()))
+            flippedSudoku.setSolutionGrid(solutionGrid: MatrixHelper.verticalFlip(matrix: numberedSudoku.getSolutionGrid()))
+        }
+        
+        return flippedSudoku
+    }
+    
+    /// Metoda náhodně sudoku horizontálně překlopí nebo ne.
+    /// - Parameter numberedSudoku: očíslované sudoku
+    /// - Returns: překlopené nebo stejné sudoku
+    private func randomHorizontalFlip(numberedSudoku: NumberedSudoku) -> NumberedSudoku {
+        var flippedSudoku: NumberedSudoku = numberedSudoku
+        let flip: Bool = Bool.random()
+        
+        if (flip) {
+            flippedSudoku.setValueGrid(valueGrid: MatrixHelper.horizontalFlip(matrix: numberedSudoku.getValueGrid()))
+            flippedSudoku.setSolutionGrid(solutionGrid: MatrixHelper.horizontalFlip(matrix: numberedSudoku.getSolutionGrid()))
+        }
+        
+        return flippedSudoku
+    }
+    
+    
+    /// Z instance očíslovaného sudoku vyrobí 2D mřížku buněk.
+    /// - Parameter numberedSudoku: očíslované sudoku
+    /// - Returns: 2D mřížka buněk
+    private func mapNumberedSudokuToCells(numberedSudoku: NumberedSudoku) -> [[Cell]] {
+        let valueGrid: [[Int]] = numberedSudoku.getValueGrid()
+        let solutionGrid: [[Int]] = numberedSudoku.getSolutionGrid()
         
         var cells: [[Cell]] = []
         
@@ -149,19 +165,6 @@ class SudokuFetcher
         }
         
         return cells
-    }
-    
-    /// Vytvoří a vrátí Session objekt s vlastní konfigurací timeoutů.
-    /// - Returns: Session objekt
-    private func createSession() -> URLSession {
-        let config = URLSessionConfiguration.default
-        
-        // vlastní nastavení timeoutu
-        config.timeoutIntervalForRequest = self.TIMEOUT_S
-        config.timeoutIntervalForResource = self.TIMEOUT_S
-
-        // použití vlastní konfigurace
-        return URLSession(configuration: config)
     }
 }
 
