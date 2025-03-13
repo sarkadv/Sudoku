@@ -3,6 +3,9 @@ import Foundation
 /// třída pro načítání dat z CSV souboru
 class CSVLoader
 {
+    /// označení prázdné buňky v CSV souboru
+    public static let emptyCell: Character = "x"
+    
     /// název CSV souboru
     private let resourceName: String = "sudokus"
     

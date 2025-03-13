@@ -67,7 +67,7 @@ class SudokuFetcher
         var allChars: [Character] = ["a", "b", "c", "d", "e", "f", "g", "h", "i"]
         var allNumbers: [Int] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         
-        var mapping: [Character : Int] = ["0" : 0]
+        var mapping: [Character : Int] = [CSVLoader.emptyCell : 0]
         
         while (allChars.count > 0) {
             let char: Character = allChars.randomElement()!

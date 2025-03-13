@@ -385,10 +385,10 @@ struct SudokuCellView: View {
     var body: some View {
         let backgroundColor: Color = self.determineCellColor()  // barva pozadí buňky
         
-        let valueColor: Color = self.determineValueColor()
+        let valueColor: Color = self.determineValueColor()  // barva hodnoty buňky
         
         let finalBorderColor: Color = self.highlighted ? COLOR_HIGHLIGHT : self.borderColor
-        let finalBorderWidth: CGFloat = self.highlighted ? self.borderWidth * 4 : borderWidth   // barva hranic buňky
+        let finalBorderWidth: CGFloat = self.highlighted ? self.borderWidth * 2 : borderWidth   // barva hranic buňky
         
         ZStack {
             if value != 0 {
@@ -426,10 +426,13 @@ struct SudokuCellView: View {
         .background(backgroundColor)
     }
     
+    /// - Parameter number: kandidát
+    /// - Returns: barva jednoho kandidáta v buňce
     private func determineCandidateFontColor(number: Int) -> Color {
         return (number == self.selectedNumber) ? COLOR_SAME_NUMBER : self.colorModeManager.isDarkMode ? .white : .black
     }
     
+    /// - Returns: barva hodnoty buňky
     private func determineValueColor() -> Color {
         // hodnota je zvýrazněna pokud má stejné číslo jako uživatelem právě vybraná buňka
         let valueColor: Color = (self.value == self.selectedNumber) ? COLOR_SAME_NUMBER : self.colorModeManager.isDarkMode ? .white : .black
