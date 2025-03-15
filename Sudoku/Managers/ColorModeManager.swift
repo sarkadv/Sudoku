@@ -23,18 +23,18 @@ class ColorModeManager: ObservableObject {
     /// Nastaví barevný mód aplikace v perzistentním úložišti a aktualizuje observed atribut isDarkMode.
     /// - Parameter mode: vybraný barevný mód aplikace
     public func setColorMode(mode: ColorMode) -> Void {
-        StorageManager.setColorMode(mode: mode)
+        StorageManager.instance.setColorMode(mode: mode)
         self.isDarkMode = getColorMode() == .dark
     }
     
     public func getStoredColorMode() -> ColorMode {
-        return StorageManager.getColorMode()
+        return StorageManager.instance.getColorMode()
     }
     
     /// Podle nastavení aplikace a zařízení určí výsledný barevný mód aplikace.
     /// - Returns: barevný mód aplikace
     private func getColorMode() -> ColorMode {
-        let colorMode: ColorMode = StorageManager.getColorMode()
+        let colorMode: ColorMode = StorageManager.instance.getColorMode()
         
         if (colorMode == .auto) {
             // podle zařízení

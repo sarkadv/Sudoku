@@ -8,10 +8,10 @@ class SudokuFetcher
     
     /// - Returns: rozehrané sudoku z perzistentního úložiště
     public func fetchContinueGame() -> [[Cell]] {
-        let starterGrid: [[Int]] = StorageManager.getContinueGameStarterValues()
-        let valueGrid: [[Int]] = StorageManager.getContinueGameValue()
-        let solutionGrid: [[Int]] = StorageManager.getContinueGameSolution()
-        let candidates: [[[Int]]] = StorageManager.getContinueGameCandidates()
+        let starterGrid: [[Int]] = StorageManager.instance.getContinueGameStarterValues()
+        let valueGrid: [[Int]] = StorageManager.instance.getContinueGameValue()
+        let solutionGrid: [[Int]] = StorageManager.instance.getContinueGameSolution()
+        let candidates: [[[Int]]] = StorageManager.instance.getContinueGameCandidates()
         
         var cells: [[Cell]] = []
         

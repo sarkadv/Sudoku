@@ -27,7 +27,7 @@ struct WinView: View {
         let fontColor: Color = self.colorModeManager.isDarkMode ? .white : .black
         
         let currentTimeString = TimeHelper.getTimeString(seconds: self.finalScoreSeconds)
-        let bestTimeString = TimeHelper.getTimeString(seconds: StorageManager.getHighscore(difficulty: self.difficulty))
+        let bestTimeString = TimeHelper.getTimeString(seconds: StorageManager.instance.getHighscore(difficulty: self.difficulty))
         
         VStack {
             Text(LocalizedStringKey("you_won"))

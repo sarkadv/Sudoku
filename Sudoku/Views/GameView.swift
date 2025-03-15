@@ -44,8 +44,8 @@ struct GameView: View {
         let candidatesHSpacing: CGFloat = isPhone ? 3.5 : 8.0   // horizontální prostor mezi kandidáty
         let toolsPadding: CGFloat = isPhone ? 40.0 : 80.0     // padding nástrojů
         let cornerRadius: CGFloat = isPhone ? 4.0 : 8.0  // zaoblení rohů
-        let buttonWidth: CGFloat = isPhone ? 125.0 : 300.0  // šířka tlačítka menu
-        let buttonHeight: CGFloat = isPhone ? 40.0 : 60.0     // výška tlačítka menu
+        let buttonWidth: CGFloat = isPhone ? 125.0 : 175.0  // šířka tlačítek
+        let buttonHeight: CGFloat = isPhone ? 40.0 : 50.0     // výška tlačítek
         let buttonColor: Color = self.colorModeManager.isDarkMode ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT   // barva tlačítka menu
         let timerFont: Font = isPhone ? .headline : .title
         let timerFontColor: Color = self.colorModeManager.isDarkMode ? .white : .black
@@ -55,6 +55,21 @@ struct GameView: View {
         // landscape mode - hlavní Stack je HStack
         if (orientation.isLandscape) {
             HStack {
+                VStack (spacing: 0) {
+                    MenuButton(buttonWidth: buttonWidth,
+                               buttonHeight: buttonHeight,
+                               cornerRadius: cornerRadius,
+                               buttonColor: buttonColor,
+                               setState: self.setState,
+                               saveGame: self.saveGame)
+                    .padding(.bottom)
+                    
+                    AudioMenu(buttonWidth: buttonWidth,
+                              buttonHeight: buttonHeight,
+                              cornerRadius: cornerRadius,
+                              buttonColor: buttonColor)
+                    .padding(.top)
+                }
                 VStack (spacing: 0) {
                     ForEach(0..<self.board.ROWS, id: \.self) { row in
                         HStack (spacing: 0) {
@@ -108,14 +123,6 @@ struct GameView: View {
                 .padding(toolsPadding)
                 
                 VStack {
-                    MenuButton(buttonWidth: buttonWidth,
-                               buttonHeight: buttonHeight,
-                               cornerRadius: cornerRadius,
-                               buttonColor: buttonColor,
-                               setState: self.setState,
-                               saveGame: self.saveGame)
-                    .padding(.bottom, toolsPadding/2)
-                    
                     TimerText(elapsedTime: self.timer.getElapsedTime(), timerFont: timerFont, timerFontColor: timerFontColor)
                     
                     ToolsView(fontSize: valueFontSize,
@@ -138,7 +145,7 @@ struct GameView: View {
                 }
             }
             .onAppear {
-                self.timer.start(elapsedTime: self.continuingGame ? StorageManager.getContinueGameTime() : self.timer.getElapsedTime())
+                self.timer.start(elapsedTime: self.continuingGame ? StorageManager.instance.getContinueGameTime() : self.timer.getElapsedTime())
             }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 self.handleScenePhaseChange(newPhase: newPhase)
@@ -147,15 +154,23 @@ struct GameView: View {
         // portrait mode - hlavní Stack je VStack
         else {
             VStack {
-                MenuButton(buttonWidth: buttonWidth,
-                           buttonHeight: buttonHeight,
-                           cornerRadius: cornerRadius,
-                           buttonColor: buttonColor,
-                           setState: self.setState,
-                           saveGame: self.saveGame)
-                .padding(toolsPadding)
+                HStack {
+                    MenuButton(buttonWidth: buttonWidth,
+                               buttonHeight: buttonHeight,
+                               cornerRadius: cornerRadius,
+                               buttonColor: buttonColor,
+                               setState: self.setState,
+                               saveGame: self.saveGame)
+                    
+                    AudioMenu(buttonWidth: buttonWidth,
+                              buttonHeight: buttonHeight,
+                              cornerRadius: cornerRadius,
+                              buttonColor: buttonColor)
+                }
+                .padding(.top, toolsPadding)
                 
                 TimerText(elapsedTime: self.timer.getElapsedTime(), timerFont: timerFont, timerFontColor: timerFontColor)
+                    .padding(.top, toolsPadding)
                 
                 VStack (spacing: 0) {
                     ForEach(0..<self.board.ROWS, id: \.self) { row in
@@ -228,7 +243,7 @@ struct GameView: View {
                 .padding(toolsPadding)
             }
             .onAppear {
-                self.timer.start(elapsedTime: self.continuingGame ? StorageManager.getContinueGameTime() : self.timer.getElapsedTime())
+                self.timer.start(elapsedTime: self.continuingGame ? StorageManager.instance.getContinueGameTime() : self.timer.getElapsedTime())
             }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 handleScenePhaseChange(newPhase: newPhase)
@@ -264,24 +279,26 @@ struct GameView: View {
     /// - Parameter newPhase: aplikace v popředí / pozadí
     /// - Returns: Void
     private func handleScenePhaseChange(newPhase: ScenePhase) -> Void {
-        if newPhase == .background {
+        if (newPhase == .background) {
             self.timer.pause()
             self.saveGame()
+            AudioManager.instance.stopMusic()
         }
-        else if newPhase == .active {
+        else if (newPhase == .active) {
             self.timer.resume()
+            AudioManager.instance.startCurrentMusic()
         }
     }
     
     /// Uloží nedohranou hru do perzistentního úložiště.
     /// - Returns: Void
     private func saveGame() -> Void {
-        StorageManager.addStoredGame(gameStarterValues: self.board.getStarterValuesAs2DArray(),
-                                     gameValue: self.board.getValueAs2DArray(),
-                                     gameSolution: self.board.getSolutionAs2DArray(),
-                                     candidates: self.board.getCandidatesAs3DArray(),
-                                     difficulty: self.difficulty,
-                                     timeSeconds: self.timer.getElapsedTime())
+        StorageManager.instance.addStoredGame(gameStarterValues: self.board.getStarterValuesAs2DArray(),
+                                              gameValue: self.board.getValueAs2DArray(),
+                                              gameSolution: self.board.getSolutionAs2DArray(),
+                                              candidates: self.board.getCandidatesAs3DArray(),
+                                              difficulty: self.difficulty,
+                                              timeSeconds: self.timer.getElapsedTime())
     }
     
     private func setState(state: ViewState) -> Void {
@@ -331,6 +348,7 @@ struct MenuButton: View {
         Button(action: {
             self.saveGame()
             self.setState(.menu)
+            AudioManager.instance.stopMusic()
         }) {
             Text(LocalizedStringKey("menu"))
                 .font(.headline)
@@ -699,11 +717,55 @@ struct ToolsView: View {
         self.setFinalScoreSeconds(self.elapsedTime)   // uložení skóre
         
         // pokud jde o nejlepší skóre pro obtížnost -> uložení do perzistentního úložiště
-        StorageManager.setHighscore(difficulty: self.difficulty, seconds: self.elapsedTime)
+        StorageManager.instance.setHighscore(difficulty: self.difficulty, seconds: self.elapsedTime)
         
         // vymazání uložené hry
-        StorageManager.removeStoredGame()
+        StorageManager.instance.removeStoredGame()
+        
+        AudioManager.instance.stopMusic()
         
         self.setState(.win)   // změna obrazovky na vítěznou
     }
 }
+
+struct AudioMenu: View {
+    /// správce hudby (observed objekt)
+    @StateObject private var audioManager = AudioManager.instance
+    
+    let buttonWidth: CGFloat
+    let buttonHeight: CGFloat
+    let cornerRadius: CGFloat
+    let buttonColor: Color
+    
+    var body: some View {
+        HStack {
+            Button(action: {
+                AudioManager.instance.toggleMusic()
+            }) {
+                Image(systemName: AudioManager.instance.isPlaying ? "pause.fill" : "play.fill")
+            }
+            
+            Menu {
+                ForEach(AudioType.allCases, id: \.self) { sound in
+                    Button(action: {
+                        AudioManager.instance.startMusic(audio: sound)
+                    }) {
+                        Text(LocalizedStringKey(sound.toString()))
+                    }
+                }
+            } label: {
+                Text(LocalizedStringKey(AudioManager.instance.currentMusic.toString()))
+                    .fixedSize(horizontal: true, vertical: false)   // celý text je zobrazen, i když není dostatek místa
+            }
+        }
+        .padding()
+        .font(.headline)
+        .frame(width: self.buttonWidth, height: self.buttonHeight)
+        .foregroundStyle(.white)
+        .background(self.buttonColor)
+        .cornerRadius(self.cornerRadius)
+    }
+    
+    
+}
+

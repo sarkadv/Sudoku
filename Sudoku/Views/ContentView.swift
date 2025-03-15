@@ -63,6 +63,8 @@ struct ContentView: View {
             .onAppear {
                 // při zobrazení update orientace zařízení
                 updateOrientation()
+                
+                // určení barevného módu
                 updateDeviceColorMode()
             }
             .onChange(of: colorScheme) {

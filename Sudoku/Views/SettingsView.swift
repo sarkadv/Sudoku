@@ -15,10 +15,10 @@ struct SettingsView: View {
     @Environment(\.horizontalSizeClass) var sizeClass: UserInterfaceSizeClass?
     
     /// vybrané barevné schéma
-    @State private var selectedColorMode: ColorMode = StorageManager.getColorMode()
+    @State private var selectedColorMode: ColorMode = StorageManager.instance.getColorMode()
     
     /// vybraný jazyk aplikace
-    @State private var selectedLanguage: Language = StorageManager.getLanguage()
+    @State private var selectedLanguage: Language = StorageManager.instance.getLanguage()
     
     /// true - iPhone / false - iPad
     private let isPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone

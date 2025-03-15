@@ -6,7 +6,7 @@ class LanguageManager: ObservableObject {
     @Published var locale: Locale
     
     init () {
-        let language: Language = StorageManager.getLanguage()
+        let language: Language = StorageManager.instance.getLanguage()
         self.locale = LanguageHelper.languageToLocale(language: language)
     }
     
@@ -14,7 +14,7 @@ class LanguageManager: ObservableObject {
     /// Nastaví jazyk aplikace a uloží hodnotu do perzistentního úložiště.
     /// - Parameter language: jazyk aplikace
     public func setLocale(language: Language) -> Void {
-        StorageManager.setLanguage(language: language)
+        StorageManager.instance.setLanguage(language: language)
         self.locale = LanguageHelper.languageToLocale(language: language)
     }
 }

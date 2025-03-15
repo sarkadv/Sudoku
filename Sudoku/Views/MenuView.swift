@@ -170,16 +170,16 @@ struct ButtonsView: View {
     let buttonSettingsColor: Color
     
     var body: some View {
-        if (StorageManager.isContinueGameStored()) {
+        if (StorageManager.instance.isContinueGameStored()) {
             Button(action: {
                 self.setContinuingGame(true)
-                self.setDifficulty(StorageManager.getContinueGameDifficulty())
+                self.setDifficulty(StorageManager.instance.getContinueGameDifficulty())
                 self.continueGame()
 
             }) {
                 (Text(LocalizedStringKey("continue"))
                  + Text(" (")
-                 + Text(LocalizedStringKey(StorageManager.getContinueGameDifficulty().toString()))
+                 + Text(LocalizedStringKey(StorageManager.instance.getContinueGameDifficulty().toString()))
                  + Text(")"))
                     .font(.headline)
                     .padding()

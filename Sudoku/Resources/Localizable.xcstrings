@@ -2,22 +2,64 @@
   "sourceLanguage" : "en",
   "strings" : {
     " " : {
-
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " "
+          }
+        }
+      }
     },
     " (" : {
-
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ("
+          }
+        }
+      }
     },
     ":" : {
-
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ":"
+          }
+        }
+      }
     },
     ": %@" : {
-
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": %@"
+          }
+        }
+      }
     },
     ")" : {
-
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ")"
+          }
+        }
+      }
     },
     "%lld" : {
-
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
     },
     "auto" : {
       "extractionState" : "manual",
@@ -172,6 +214,23 @@
         }
       }
     },
+    "forest" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les 🌳"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forest 🌳"
+          }
+        }
+      }
+    },
     "hard" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -291,6 +350,23 @@
         }
       }
     },
+    "ocean" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oceán 🌊"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocean 🌊"
+          }
+        }
+      }
+    },
     "pencil_tool" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -308,6 +384,23 @@
         }
       }
     },
+    "rain" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déšť 🌧️"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain 🌧️"
+          }
+        }
+      }
+    },
     "remove_tool" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -321,6 +414,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🧽"
+          }
+        }
+      }
+    },
+    "river" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Řeka ⚓️"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "River ⚓️"
           }
         }
       }
