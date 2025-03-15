@@ -282,11 +282,11 @@ struct GameView: View {
         if (newPhase == .background) {
             self.timer.pause()
             self.saveGame()
-            AudioManager.instance.stopMusic()
+            AudioManager.instance.muteMusic()
         }
         else if (newPhase == .active) {
             self.timer.resume()
-            AudioManager.instance.startCurrentMusic()
+            AudioManager.instance.unmuteMusic()
         }
     }
     

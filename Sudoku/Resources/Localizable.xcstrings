@@ -356,13 +356,13 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oceán 🌊"
+            "value" : "Oceán 🐙"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ocean 🌊"
+            "value" : "Ocean 🐙"
           }
         }
       }
@@ -424,13 +424,13 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Řeka ⚓️"
+            "value" : "Řeka 🌊"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "River ⚓️"
+            "value" : "River 🌊"
           }
         }
       }

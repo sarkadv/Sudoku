@@ -26,7 +26,7 @@ class AudioManager: ObservableObject {
         }
     }
     
-    /// Pozastaví / znovu spustí hudbu.
+    /// Zastaví / znovu spustí hudbu.
     public func toggleMusic() -> Void {
         if (self.isPlaying) {
             self.stopMusic()
@@ -61,7 +61,19 @@ class AudioManager: ObservableObject {
 
     }
     
-    /// Pozastaví hudbu.
+    /// Pozastaví hudbu bez změny stavu, zda je hudba puštěná,
+    public func muteMusic() -> Void {
+        self.audioPlayer?.stop()
+    }
+    
+    /// Pokud je podle atributu hudba puštěná, bude nyní znovu slyšitelná.
+    public func unmuteMusic() -> Void {
+        if (self.isPlaying) {
+            self.startCurrentMusic()
+        }
+    }
+    
+    /// Zastaví hudbu.
     public func stopMusic() -> Void {
         self.audioPlayer?.stop()
         self.isPlaying = false
