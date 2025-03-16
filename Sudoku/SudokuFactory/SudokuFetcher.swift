@@ -102,7 +102,7 @@ class SudokuFetcher
     /// - Parameter numberedSudoku: očíslované sudoku
     /// - Returns: rotované sudoku
     private func rotate90Degrees(numberedSudoku: NumberedSudoku) -> NumberedSudoku {
-        var rotatedSudoku: NumberedSudoku = numberedSudoku
+        let rotatedSudoku: NumberedSudoku = numberedSudoku
         
         rotatedSudoku.setValueGrid(valueGrid: MatrixHelper.rotate90DegreesClockwise(matrix: numberedSudoku.getValueGrid()))
         rotatedSudoku.setSolutionGrid(solutionGrid: MatrixHelper.rotate90DegreesClockwise(matrix: numberedSudoku.getSolutionGrid()))
@@ -114,7 +114,7 @@ class SudokuFetcher
     /// - Parameter numberedSudoku: očíslované sudoku
     /// - Returns: překlopené nebo stejné sudoku
     private func randomVerticalFlip(numberedSudoku: NumberedSudoku) -> NumberedSudoku {
-        var flippedSudoku: NumberedSudoku = numberedSudoku
+        let flippedSudoku: NumberedSudoku = numberedSudoku
         let flip: Bool = Bool.random()
         
         if (flip) {
@@ -129,7 +129,7 @@ class SudokuFetcher
     /// - Parameter numberedSudoku: očíslované sudoku
     /// - Returns: překlopené nebo stejné sudoku
     private func randomHorizontalFlip(numberedSudoku: NumberedSudoku) -> NumberedSudoku {
-        var flippedSudoku: NumberedSudoku = numberedSudoku
+        let flippedSudoku: NumberedSudoku = numberedSudoku
         let flip: Bool = Bool.random()
         
         if (flip) {

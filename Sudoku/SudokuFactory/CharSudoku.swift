@@ -1,5 +1,5 @@
 /// sudoku nahrané ze souboru obsahující znaky místo čísel
-struct CharSudoku {
+class CharSudoku {
     private let value: [[Character]]
     private let solution: [[Character]]
     private let difficulty: Difficulty

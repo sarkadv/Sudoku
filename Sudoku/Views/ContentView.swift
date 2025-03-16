@@ -49,7 +49,7 @@ struct ContentView: View {
                         .environment(\.locale, languageManager.locale)
                 }
                 else if (state == .win) {
-                    WinView(state: $state, difficulty: $difficulty, finalScoreSeconds: $finalScoreSeconds)
+                    WinView(state: $state, difficulty: $difficulty, finalScoreSeconds: $finalScoreSeconds, orientation: $orientation)
                         .environmentObject(colorModeManager)
                         .environment(\.locale, languageManager.locale)
                 }

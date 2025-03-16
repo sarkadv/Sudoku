@@ -1,5 +1,5 @@
 /// sudoku nahrané ze souboru a očíslované náhodným mapováním znaku na číslo
-struct NumberedSudoku {
+class NumberedSudoku {
     private var value: [[Int]]
     private var solution: [[Int]]
     private let difficulty: Difficulty
@@ -22,7 +22,7 @@ struct NumberedSudoku {
         return self.value
     }
     
-    public mutating func setValueGrid(valueGrid: [[Int]]) -> Void {
+    public func setValueGrid(valueGrid: [[Int]]) -> Void {
         self.value = valueGrid
     }
     
@@ -30,7 +30,7 @@ struct NumberedSudoku {
         return self.solution
     }
     
-    public mutating func setSolutionGrid(solutionGrid: [[Int]]) -> Void {
+    public func setSolutionGrid(solutionGrid: [[Int]]) -> Void {
         self.solution = solutionGrid
     }
 
