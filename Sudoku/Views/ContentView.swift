@@ -13,13 +13,14 @@ struct ContentView: View {
     /// čas v sekundách poslední dohrané hry
     @State private var finalScoreSeconds: Int = 0
     
-    /// správce barevného módu
-    @StateObject private var colorModeManager: ColorModeManager = ColorModeManager()
     /// pro nastavení colorModeManager
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     
     /// správce jazyka aplikace
-    @StateObject var languageManager = LanguageManager()
+    @StateObject var languageManager = LanguageManager.instance
+    
+    /// správce barevného módu
+    @StateObject var colorModeManager = ColorModeManager.instance
     
     /// orientace zařízení
     @State private var orientation: UIDeviceOrientation = UIDevice.current.orientation
@@ -27,37 +28,27 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             // barva pozadí podle barevného módu
-            if (self.colorModeManager.isDarkMode) {
-                Color.black.ignoresSafeArea()
-            }
-            else {
-                Color.white.ignoresSafeArea()
-            }
+            self.colorModeManager.getBackgroundColor().ignoresSafeArea()
             
             VStack {
                 // výběr okna podle stavu aplikace
                 if (state == .menu) {
                     MenuView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, orientation: $orientation)
                         .environmentObject(board)
-                        .environmentObject(colorModeManager)
                         .environment(\.locale, languageManager.locale)
                 }
                 else if (state == .game) {
                     GameView(state: $state, difficulty: $difficulty, continuingGame: $continuingGame, finalScoreSeconds: $finalScoreSeconds, orientation: $orientation)
                         .environmentObject(board)
-                        .environmentObject(colorModeManager)
                         .environment(\.locale, languageManager.locale)
                 }
                 else if (state == .win) {
                     WinView(state: $state, difficulty: $difficulty, finalScoreSeconds: $finalScoreSeconds, orientation: $orientation)
-                        .environmentObject(colorModeManager)
                         .environment(\.locale, languageManager.locale)
                 }
                 else if (state == .settings) {
                     SettingsView(state: $state)
-                        .environmentObject(colorModeManager)
                         .environment(\.locale, languageManager.locale)
-                        .environmentObject(languageManager)
                 }
             }
             .onAppear {

@@ -3,7 +3,7 @@ import SwiftUI
 /// Třída poskytuje perzistentní uložení dat mezi vypnutím a zapnutím aplikace.
 class StorageManager {
     /// jedináček
-    public static var instance = StorageManager()
+    public static let instance = StorageManager()
     
     private static let INT_INITIALIZER: Int = Int.max
     private static let STRING_INITIALIZER: String = ""

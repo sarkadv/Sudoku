@@ -16,7 +16,7 @@ struct MenuView: View {
     @Binding var orientation: UIDeviceOrientation
     
     /// správce barevného módu
-    @EnvironmentObject var colorModeManager: ColorModeManager
+    @StateObject private var colorModeManager: ColorModeManager = ColorModeManager.instance
     
     /// true - iPhone / false - iPad
     private let isPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone
@@ -24,27 +24,17 @@ struct MenuView: View {
     var body: some View {
         let spacing: CGFloat = isPhone ? 20.0 : 30.0    // velikost mezery mezi tlačítky
         let imageSize: CGFloat = isPhone ? 200.0 : 400.0    // velikost úvodního obrázku
-        let imageName: String = self.colorModeManager.isDarkMode ? "sudoku_dark" : "sudoku_light" // úvodní obrázek
         let buttonWidth: CGFloat = isPhone ? 250.0 : 350.0  // šířka tlačítka
         let buttonHeight: CGFloat = isPhone ? 35.0 : 60.0   // výška tlačítka
         let titleFontSize: CGFloat = isPhone ? 30.0 : 50.0  // velikost nadpisu
-        let fontColor: Color = self.colorModeManager.isDarkMode ? .white : .black   // barva fontu
-        
-        // barvy tlačítek
-        let buttonContinueColor: Color = self.colorModeManager.isDarkMode ? BOX_COLOR_PURPLE_DARK : BOX_COLOR_PURPLE_LIGHT
-        let buttonEasyColor: Color = self.colorModeManager.isDarkMode ? COLOR_EASY_DARK : COLOR_EASY_LIGHT
-        let buttonMediumColor: Color = self.colorModeManager.isDarkMode ? COLOR_MEDIUM_DARK : COLOR_MEDIUM_LIGHT
-        let buttonHardColor: Color = self.colorModeManager.isDarkMode ? COLOR_HARD_DARK : COLOR_HARD_LIGHT
-        let buttonDemoColor: Color = self.colorModeManager.isDarkMode ? COLOR_DEMO_DARK : COLOR_DEMO_LIGHT
-        let buttonSettingsColor: Color = self.colorModeManager.isDarkMode ? COLOR_GRAY_DARK : COLOR_GRAY_LIGHT
         
         // landscape mode
         if (orientation.isLandscape) {
             HStack (spacing: spacing * 4) {
                 VStack (spacing: 0) {
-                    ImageView(imageName: imageName, imageSize: imageSize)
+                    ImageView(imageSize: imageSize)
                     
-                    TitleView(fontSize: titleFontSize, fontColor: fontColor)
+                    TitleView(fontSize: titleFontSize)
                 }
                 
                 VStack (spacing: spacing) {
@@ -54,22 +44,16 @@ struct MenuView: View {
                                 newGame: self.newGame,
                                 continueGame: self.continueGame,
                                 buttonWidth: buttonWidth,
-                                buttonHeight: buttonHeight,
-                                buttonContinueColor: buttonContinueColor,
-                                buttonEasyColor: buttonEasyColor,
-                                buttonMediumColor: buttonMediumColor,
-                                buttonHardColor: buttonHardColor,
-                                buttonDemoColor: buttonDemoColor,
-                                buttonSettingsColor: buttonSettingsColor)
+                                buttonHeight: buttonHeight)
                 }
             }
         }
         // portait mode
         else {
             VStack (spacing: spacing) {
-                ImageView(imageName: imageName, imageSize: imageSize)
+                ImageView(imageSize: imageSize)
                 
-                TitleView(fontSize: titleFontSize, fontColor: fontColor)
+                TitleView(fontSize: titleFontSize)
                 
                 ButtonsView(setState: self.setState,
                             setDifficulty: self.setDifficulty,
@@ -77,13 +61,7 @@ struct MenuView: View {
                             newGame: self.newGame,
                             continueGame: self.continueGame,
                             buttonWidth: buttonWidth,
-                            buttonHeight: buttonHeight,
-                            buttonContinueColor: buttonContinueColor,
-                            buttonEasyColor: buttonEasyColor,
-                            buttonMediumColor: buttonMediumColor,
-                            buttonHardColor: buttonHardColor,
-                            buttonDemoColor: buttonDemoColor,
-                            buttonSettingsColor: buttonSettingsColor)
+                            buttonHeight: buttonHeight)
             }
         }
     }
@@ -115,13 +93,14 @@ struct MenuView: View {
 
 /// zobrazení úvodního obrázku
 struct ImageView: View {
-    /// název úvodního obrázku
-    let imageName: String
+    /// správce barevného módu
+    @StateObject private var colorModeManager: ColorModeManager = ColorModeManager.instance
+    
     /// velikost úvodního obrázku
     let imageSize: CGFloat
     
     var body: some View {
-        Image(imageName)
+        Image(self.colorModeManager.getSudokuImageName())
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: imageSize, height: imageSize)
@@ -131,19 +110,24 @@ struct ImageView: View {
 
 /// zobrazení názvu hry
 struct TitleView: View {
+    /// správce barevného módu
+    @StateObject private var colorModeManager: ColorModeManager = ColorModeManager.instance
+    
     let fontSize: CGFloat
-    let fontColor: Color
     
     var body: some View {
         Text(LocalizedStringKey("sudoku"))
             .padding()
             .font(.system(size: fontSize))
-            .foregroundStyle(fontColor)
+            .foregroundStyle(self.colorModeManager.getFontColor())
     }
 }
 
 /// zobrazení tlačítek v menu
 struct ButtonsView: View {
+    /// správce barevného módu
+    @StateObject private var colorModeManager: ColorModeManager = ColorModeManager.instance
+    
     /// callback pro změnu stavu aplikace
     let setState: (ViewState) -> Void
     /// callback pro změnu aktuální obtížnosti hry
@@ -161,14 +145,6 @@ struct ButtonsView: View {
     /// výška tlačítka
     let buttonHeight: CGFloat
     
-    // barvy tlačítek
-    let buttonContinueColor: Color
-    let buttonEasyColor: Color
-    let buttonMediumColor: Color
-    let buttonHardColor: Color
-    let buttonDemoColor: Color
-    let buttonSettingsColor: Color
-    
     var body: some View {
         if (StorageManager.instance.isContinueGameStored()) {
             Button(action: {
@@ -177,14 +153,14 @@ struct ButtonsView: View {
                 self.continueGame()
 
             }) {
-                (Text(LocalizedStringKey("continue"))
+                (Text(LocalizedStringKey(ButtonType.continuing.toString()))
                  + Text(" (")
                  + Text(LocalizedStringKey(StorageManager.instance.getContinueGameDifficulty().toString()))
                  + Text(")"))
                     .font(.headline)
                     .padding()
                     .frame(width: buttonWidth, height: buttonHeight)
-                    .background(buttonContinueColor)
+                    .background(self.colorModeManager.getButtonColor(type: .continuing))
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
@@ -195,11 +171,11 @@ struct ButtonsView: View {
             self.setDifficulty(.easy)
             self.newGame()
         }) {
-            Text(LocalizedStringKey("easy"))
+            Text(LocalizedStringKey(ButtonType.easy.toString()))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)
-                .background(buttonEasyColor)
+                .background(self.colorModeManager.getButtonColor(type: .easy))
                 .foregroundColor(.white)
                 .cornerRadius(8)
         }
@@ -210,11 +186,11 @@ struct ButtonsView: View {
             self.setDifficulty(.medium)
             self.newGame()
         }) {
-            Text(LocalizedStringKey("medium"))
+            Text(LocalizedStringKey(ButtonType.medium.toString()))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)
-                .background(buttonMediumColor)
+                .background(self.colorModeManager.getButtonColor(type: .medium))
                 .foregroundColor(.white)
                 .cornerRadius(8)
         }
@@ -225,11 +201,11 @@ struct ButtonsView: View {
             self.setDifficulty(.hard)
             self.newGame()
         }) {
-            Text(LocalizedStringKey("hard"))
+            Text(LocalizedStringKey(ButtonType.hard.toString()))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)
-                .background(buttonHardColor)
+                .background(self.colorModeManager.getButtonColor(type: .hard))
                 .foregroundColor(.white)
                 .cornerRadius(8)
         }
@@ -240,11 +216,11 @@ struct ButtonsView: View {
             self.setDifficulty(.demo)
             self.newGame()
         }) {
-            Text(LocalizedStringKey("demo"))
+            Text(LocalizedStringKey(ButtonType.demo.toString()))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)
-                .background(buttonDemoColor)
+                .background(self.colorModeManager.getButtonColor(type: .demo))
                 .foregroundColor(.white)
                 .cornerRadius(8)
         }
@@ -253,11 +229,11 @@ struct ButtonsView: View {
         Button(action: {
             self.setState(.settings)
         }) {
-            Text(LocalizedStringKey("settings"))
+            Text(LocalizedStringKey(ButtonType.settings.toString()))
                 .font(.headline)
                 .padding()
                 .frame(width: buttonWidth, height: buttonHeight)
-                .background(buttonSettingsColor)
+                .background(self.colorModeManager.getButtonColor(type: .settings))
                 .foregroundColor(.white)
                 .cornerRadius(8)
         }

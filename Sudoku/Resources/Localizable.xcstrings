@@ -67,13 +67,13 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Automaticky"
+            "value" : "Automaticky 📱"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Automatically"
+            "value" : "Automatically 📱"
           }
         }
       }
@@ -112,7 +112,7 @@
         }
       }
     },
-    "continue" : {
+    "continuing" : {
       "extractionState" : "manual",
       "localizations" : {
         "cs" : {
@@ -152,13 +152,13 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tmavý"
+            "value" : "Tmavý 🌑"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dark"
+            "value" : "Dark 🌑"
           }
         }
       }
@@ -305,13 +305,13 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Světlý"
+            "value" : "Světlý ☀"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Light"
+            "value" : "Light ☀"
           }
         }
       }
@@ -363,6 +363,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ocean 🐙"
+          }
+        }
+      }
+    },
+    "pastel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pastelový 🍭"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pastel 🍭"
           }
         }
       }
@@ -492,13 +509,13 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vyhráli jste!"
+            "value" : "vyhráli jste!"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You won!"
+            "value" : "you won!"
           }
         }
       }

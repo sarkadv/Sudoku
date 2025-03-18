@@ -2,10 +2,13 @@ import SwiftUI
 
 /// správa jazyka aplikace
 class LanguageManager: ObservableObject {
+    /// jedináček
+    public static let instance: LanguageManager = LanguageManager()
+    
     /// jazyk aplikace
     @Published var locale: Locale
     
-    init () {
+    private init () {
         let language: Language = StorageManager.instance.getLanguage()
         self.locale = LanguageHelper.languageToLocale(language: language)
     }
