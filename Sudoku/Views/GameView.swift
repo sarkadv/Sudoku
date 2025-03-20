@@ -60,7 +60,7 @@ struct GameView: View {
                                saveGame: self.saveGame)
                     .padding(.bottom)
                     
-                    AudioMenu(buttonWidth: buttonWidth,
+                    AudioMenuView(buttonWidth: buttonWidth,
                               buttonHeight: buttonHeight,
                               cornerRadius: cornerRadius)
                     .padding(.top)
@@ -153,7 +153,7 @@ struct GameView: View {
                                setState: self.setState,
                                saveGame: self.saveGame)
                     
-                    AudioMenu(buttonWidth: buttonWidth,
+                    AudioMenuView(buttonWidth: buttonWidth,
                               buttonHeight: buttonHeight,
                               cornerRadius: cornerRadius)
                 }
@@ -548,7 +548,7 @@ struct ToolsView: View {
     let orientation: UIDeviceOrientation
     
     var body: some View {
-        let fontColor: Color = (self.board.isPreFilled(row: self.selectedRow, column: self.selectedColumn)) ? .gray : self.colorModeManager.getFontColor()
+        let fontColor: Color = (self.board.isPreFilled(row: self.selectedRow, column: self.selectedColumn)) ? self.colorModeManager.getInactiveToolsColor() : self.colorModeManager.getFontColor()
         
         // pro předvyplněné buňky není nástroj vymazat viditelný
         let removeToolVisibility: CGFloat = (self.board.isPreFilled(row: self.selectedRow, column: self.selectedColumn)) ? 0.0 : 1.0
@@ -716,7 +716,8 @@ struct ToolsView: View {
     }
 }
 
-struct AudioMenu: View {
+/// komponenta pro přehrávání hudby
+struct AudioMenuView: View {
     /// správce hudby (observed objekt)
     @StateObject private var audioManager = AudioManager.instance
     

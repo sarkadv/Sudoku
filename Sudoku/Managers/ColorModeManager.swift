@@ -35,6 +35,24 @@ class ColorModeManager: ObservableObject {
         return StorageManager.instance.getColorMode()
     }
     
+    /// Podle nastavení aplikace a zařízení určí výsledný barevný mód aplikace.
+    /// - Returns: barevný mód aplikace
+    private func getColorMode() -> ColorMode {
+        let colorMode: ColorMode = StorageManager.instance.getColorMode()
+        
+        if (colorMode == .auto) {
+            // podle zařízení
+            return self.deviceColorMode == .dark ? .dark : .light
+        }
+        else {
+            // podle nastavení aplikace
+            return colorMode
+        }
+        
+    }
+    
+    // METODY PRO ZÍSKÁNÍ BARVY PRVKŮ UI
+    
     public func getBackgroundColor() -> Color {
         switch (self.colorMode) {
             case .dark: return .black
@@ -180,6 +198,16 @@ class ColorModeManager: ObservableObject {
         }
     }
     
+    public func getInactiveToolsColor() -> Color {
+        switch (self.colorMode) {
+            case .dark: return .gray
+            case .light: return .gray
+            case .pastel: return COLOR_MENU_PASTEL
+            
+            default: return .clear
+        }
+    }
+    
     public func getWinAnimationFrames() -> [String] {
         switch (self.colorMode) {
             case .dark: return ["trophy_dark_1", "trophy_dark_2"]
@@ -188,22 +216,6 @@ class ColorModeManager: ObservableObject {
             
             default: return []
         }
-    }
-    
-    /// Podle nastavení aplikace a zařízení určí výsledný barevný mód aplikace.
-    /// - Returns: barevný mód aplikace
-    private func getColorMode() -> ColorMode {
-        let colorMode: ColorMode = StorageManager.instance.getColorMode()
-        
-        if (colorMode == .auto) {
-            // podle zařízení
-            return self.deviceColorMode == .dark ? .dark : .light
-        }
-        else {
-            // podle nastavení aplikace
-            return colorMode
-        }
-        
     }
 
 }

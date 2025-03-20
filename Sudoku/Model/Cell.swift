@@ -1,15 +1,16 @@
 import Foundation
 
+/// jedna buňka sudoku
 class Cell: ObservableObject
 {
-    /// správné řešení buňky
-    private var solution: Int
-    
     /// aktuální hodnota buňky (0 pokud prázdná)
     private var value: Int
     
     /// uživatelem vybraní kandidáti na hodnotu buňky
     private var candidates: Set<Int>
+    
+    /// správné řešení buňky
+    private var solution: Int
     
     /// řádek buňky
     private var row: Int
