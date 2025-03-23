@@ -1,6 +1,6 @@
 import AVFoundation
 
-/// spravuje přehrávání zvuku na pozadí
+/// spravuje přehrávání zvuku
 class AudioManager: ObservableObject {
     /// jedináček
     public static let instance = AudioManager()

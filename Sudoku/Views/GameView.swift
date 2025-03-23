@@ -728,12 +728,16 @@ struct AudioMenuView: View {
     let buttonHeight: CGFloat
     let cornerRadius: CGFloat
     
+    private let SYMBOL_PAUSE: String = "pause.fill"
+    
+    private let SYMBOL_PLAY: String = "play.fill"
+    
     var body: some View {
         HStack {
             Button(action: {
                 AudioManager.instance.toggleMusic()
             }) {
-                Image(systemName: AudioManager.instance.isPlaying ? "pause.fill" : "play.fill")
+                Image(systemName: AudioManager.instance.isPlaying ? SYMBOL_PAUSE : SYMBOL_PLAY)
             }
             
             Menu {
