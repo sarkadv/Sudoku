@@ -16,6 +16,12 @@ struct ContentView: View {
     /// pro nastavení colorModeManager
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     
+    /// aplikace v popředí / pozadí
+    @Environment(\.scenePhase) var scenePhase: ScenePhase
+    
+    /// true - iPhone / false - iPad
+    private let isPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone
+    
     /// správce jazyka aplikace
     @StateObject var languageManager = LanguageManager.instance
     
@@ -61,6 +67,9 @@ struct ContentView: View {
             .onChange(of: colorScheme) {
                 updateDeviceColorMode()
             }
+            .onChange(of: scenePhase) { oldPhase, newPhase in
+                updateOrientation()
+            }
             .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
                 // při změně orientace update orientace zařízení
                 updateOrientation()
@@ -69,20 +78,30 @@ struct ContentView: View {
     }
     
     /// Provede update aktuální orientace zařízení.
-    private func updateOrientation() {
+    private func updateOrientation() -> Void {
         let currentOrientation: UIDeviceOrientation = UIDevice.current.orientation
         
         // některé orientace ignorovány
-        if (currentOrientation == .portraitUpsideDown ||
-            currentOrientation == .faceUp ||
+        if (currentOrientation == .faceUp ||
             currentOrientation == .faceDown) {
             return
+        }
+        
+        // poloha vzhůru nohama u iPhonu ignorována, u iPadu změněna
+        if (currentOrientation == .portraitUpsideDown) {
+            if (self.isPhone) {
+                return
+            }
+            else {
+                self.orientation = .portrait
+                return
+            }
         }
         
         self.orientation = currentOrientation
     }
     
-    private func updateDeviceColorMode() {
+    private func updateDeviceColorMode() -> Void {
         self.colorModeManager.setDeviceColorMode(deviceColorMode: self.colorScheme == .dark ? .dark : .light)
     }
 }
